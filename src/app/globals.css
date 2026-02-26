@@ -1,0 +1,995 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin './hero.ts';
+/* Note: You may need to change the path to fit your project structure */
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --primary: oklch(0.205 0 0);
+  --heroui-default: #000;
+  --font-geist-sans: "Geist";
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+@theme {
+}
+
+@theme inline {
+  --animate-scroller: infinite-loop-scroll 20s linear infinite;
+
+  @keyframes infinite-loop-scroll {
+    100% {
+      transform: translate(-50%);
+    }
+  }
+  --breakpoint-laptop: 1180px;
+  --breakpoint-tablet: 770px;
+  --breakpoint-mobile: 492px;
+  --Border-Radius-Cards: 20px;
+  --shadow-lg:
+    0 4px 6px -4px rgba(140, 140, 140, 0.1),
+    0 10px 15px -3px rgba(140, 140, 140, 0.1);
+  --my-gradient:
+    url("/Ce-que-couvre-votre-contrat-overlay.png"),
+    linear-gradient(
+      180deg,
+      var(--color-Sage-Gray-Lowest) 0%,
+      var(--color-white,) 32.97%,
+      var(--color-white) 75%,
+      var(--color-Secondary-Blue-Lowest) 100%
+    );
+  --color-white: #ffffff;
+  --color-Secondary-Blue-Higher: #0f172e;
+  --color-Secondary-Blue-High: #172240;
+  --color-Secondary-Blue-Medium: #375299;
+  --color-Secondary-Blue-Lower: #4a5a7a;
+  --color-Secondary-Blue-Lowest: #edf0f5;
+  --color-Secondary-Red-Higher: #401f17;
+  --color-Secondary-Red-High: #5c2a20;
+  --color-Secondary-Red-Medium: #994937;
+  --color-Secondary-Red-Lowest: #f5efee;
+  --color-Secondary-Red-Lowest: #f5efee;
+  --color-Secondary-Violet-Higher: #2a1030;
+  --color-Secondary-Violet-High: #381740;
+  --color-Secondary-Violet-Medium: #863799;
+  --color-Secondary-Violet-Lower: #6d4a7a;
+  --color-Secondary-Violet-Lowest: #f3ebf5;
+  --heroui-foreground-500: #ff0404;
+  --color-Sage-Gray-Lower: #e4e8df;
+  --color-Sage-Gray-Lowest: #f3f5f1;
+  --color-Sage-Gray-Medium: #a6ac9e;
+  --color-Primary-800: #25370b;
+  --color-Primary-500: #5a7a2c;
+  --color-Primary-600: #4f6f24;
+  --color-Primary-300: #c2d4a8;
+  --color-Brand-600: #426015;
+  --color-Text-Body: #5a5a5a; /*odld :  --color-Text-Body: #8c8c8c; */
+  --color-Text-Body-2: #545454;
+  --color-Sage-Gray-High: #53564d; /* old  --color-Sage-Gray-High: #868c7d; */
+  --color-Sage-Gray-Higher: #3d4232;
+  --color-BG-BG-5: #404040;
+  --color-Neutral-BG-1: #f5f5f5;
+  --color-Neutral-BG-2: #e8e8e8;
+  --color-Neutral-BG-3: #d4d4d4;
+  --color-Neutral-BG-4: #acacac;
+  --color-Neutral-BG-5: #525252;
+  --color-Neutral-Dark: #0f110c;
+  --color-Sage-Gray-Low: #cfd4c9; /* old  --color-Sage-Gray-Low: #cfd4c9; */
+  --color-BG-BG-3-3: #0d0f0b;
+  --color-background: var(--background);
+  --color-primary: var(--primary);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* HeroUI Success and Danger Colors for Toast Notifications */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger-800: #991b1b;
+  --color-danger-900: #7f1d1d;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer utilities {
+  .bg-sage-to-blue {
+    background:
+      url("/Ce-que-couvre-votre-contrat-overlay.png"),
+      linear-gradient(
+        180deg,
+        var(--color-Sage-Gray-Lowest) 0%,
+        var(--color-white,) 32.97%,
+        var(--color-white) 75%,
+        var(--color-Secondary-Blue-Lowest) 100%
+      );
+  }
+
+  .x-fade-out {
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      white 10%,
+      white 80%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      white 10%,
+      white 80%,
+      transparent
+    );
+  }
+
+  .bg-custom-gradient {
+    background:
+      radial-gradient(
+        192.87% 161.51% at -57.24% -87.78%,
+        rgba(182, 192, 218, 0.6) 0%,
+        rgba(255, 255, 255, 0) 100%
+      ),
+      radial-gradient(
+        117.13% 108.61% at 126.38% -47.07%,
+        rgba(232, 199, 193, 0.6) 0%,
+        rgba(255, 255, 255, 0) 100%
+      );
+  }
+
+  .bg-custom-gradient-2 {
+    background: linear-gradient(180deg, #fff 0%, #edf0f5 100%);
+  }
+}
+
+@layer components {
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .f-col {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* hide scrollbar */
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.AccordionTrigger[data-state="open"] .x-icon {
+  background-color: black;
+  color: white;
+}
+.AccordionTrigger[data-state="open"] .x-icon svg {
+  transform: rotate(45deg);
+}
+.gray-ellipse,
+.dark-ellipse {
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+}
+.gray-ellipse {
+  background-color: var(--color-Sage-Gray-Higher);
+  width: 4px;
+  height: 4px;
+}
+.dark-ellipse {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-Neutral-Dark);
+}
+.step-line {
+  width: 4px; /* same as SVG width */
+  height: 100%; /* full height of parent */
+  background: repeating-linear-gradient(
+    to bottom,
+    #375299 0,
+    #375299 1px,
+    /* dash length */ #edf0f5 1px,
+    #edf0f5 8px /* gap length */
+  );
+  border-radius: 2px; /* match strokeLinecap="round" */
+}
+
+body {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-sans), sans-serif;
+  min-width: 100% !important;
+}
+
+html body[data-scroll-locked] {
+  margin-right: 0px !important;
+  margin-left: 0px !important;
+  overflow-y: visible !important;
+}
+
+.button-s {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.button2-s {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.Button-M {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.Button2-XS {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.Button-XS {
+  font-size: 12px;
+  font-weight: 500;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.Button2-M {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.Headings-H1 {
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 60px;
+  letter-spacing: -3px;
+}
+
+.Headings-H2 {
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 48px;
+  letter-spacing: -2px;
+}
+
+.Headings-H3 {
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 40px;
+  letter-spacing: -1px;
+}
+
+.Headings-H4 {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 36px;
+  letter-spacing: -0.5px;
+}
+
+.Headings-H5 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.5px;
+}
+
+.Headings-H6 {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.25px;
+}
+
+.Headings-H7 {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.25px;
+}
+
+.Text-M {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+.Text-XL {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.Text-S {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  letter-spacing: 0;
+}
+
+.Line {
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-Neutral-BG-2);
+}
+
+.hero {
+  background-image: url("../../public/particuleirs-hero-bg.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+@keyframes fillBar {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.embla {
+  --slide-width: 400px;
+  --slide-height: 420px;
+  --slide-spacing: 1rem;
+  --slide-size: 100%;
+  max-width: var(--slide-width);
+  height: var(--slide-height);
+  width: 100%;
+  margin: auto;
+  user-select: none;
+}
+
+/* .embla__viewport {
+  overflow: hidden;
+} */
+.embla__container {
+  display: flex;
+  align-items: center;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+
+.embla__slide {
+  transform: translate3d(0, 0, 0);
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+  padding: 20px;
+  width: 100%;
+  height: var(--slide-height);
+  background-color: var(--color-Primary-500);
+  background-image: url("/green-card-overlay.png");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  margin: 0 20px;
+  transition: transform 0.3s ease-in-out;
+
+  h3 {
+    color: var(--color-white);
+  }
+
+  p {
+    color: var(--color-white);
+  }
+}
+
+.embla__slide:not(.is-snapped) {
+  margin: 0;
+  background-image: none;
+  background-color: var(--color-Primary-300);
+  transform: scale(0.9);
+
+  h3 {
+    color: var(--color-Neutral-Dark);
+  }
+
+  p {
+    color: var(--color-Neutral-Dark);
+  }
+}
+
+.embla__slide__img {
+  border-radius: 1.8rem;
+  display: block;
+  height: var(--slide-height);
+  width: 100%;
+  object-fit: cover;
+}
+
+.embla__controls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin-top: 1.8rem;
+}
+
+.embla__buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.embla__button {
+  -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  touch-action: manipulation;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
+  width: 3.6rem;
+  height: 3.6rem;
+  z-index: 1;
+  border-radius: 50%;
+  color: var(--text-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embla__button:disabled {
+  color: var(--detail-high-contrast);
+}
+
+.embla__button__svg {
+  width: 35%;
+  height: 35%;
+}
+
+.embla__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: calc((2.6rem - 1.4rem) / 2 * -1);
+}
+
+.embla__dot {
+  -webkit-tap-highlight-color: rgba(var(--text-high-contrast-rgb-value), 0.5);
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  touch-action: manipulation;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 2.6rem;
+  height: 2.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.embla__dot:after {
+  box-shadow: inset 0 0 0 0.2rem var(--detail-medium-contrast);
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  content: "";
+}
+
+.embla__dot--selected:after {
+  box-shadow: inset 0 0 0 0.2rem var(--text-body);
+}
+.datepk div[data-editable="true"]:focus {
+  background-color: color-mix(
+    in srgb,
+    var(--color-Dark-Olive-2-Lower) 80%,
+    white
+  );
+}
+.datepk > div {
+  background-color: var(--color-Dark-Olive-2-Lowest);
+  color: #a6ac9e;
+}
+.datepk > div:hover {
+  background-color: var(--color-Dark-Olive-2-Lower);
+}
+@media (hover: hover) {
+  .datepk .focus-within\:hover\:bg-default-100:focus-within:hover {
+    background-color: var(--color-Dark-Olive-2-Lower);
+  }
+}
+
+td > span {
+  background-color: transparent;
+}
+td[aria-selected="true"] > span {
+  background-color: var(--color-BG-Dark);
+}
+td > span[data-hover="true"] {
+  background-color: var(--color-Dark-Olive-2-Lower);
+}
+td > span[data-hover="true"] > span {
+  color: var(--color-BG-Dark);
+}
+
+.checkbox:not([data-selected]) > span {
+  outline-color: #acacac;
+  outline-width: 1px;
+  border-radius: 6px;
+}
+.checkbox span:nth-of-type(2) {
+  color: var(--color-BG-BG-5);
+  font-size: 14px;
+}
+@media (max-width: 1276px) {
+}
+
+@media (max-width: 768px) {
+  :root {
+    --my-gradient: linear-gradient(
+      180deg,
+      var(--color-Sage-Gray-Lowest) 0%,
+      var(--color-white) 32.97%,
+      var(--color-white) 75%,
+      var(--color-Secondary-Blue-Lowest) 100%
+    );
+  }
+
+  .Headings-H1 {
+    font-size: 36px;
+    line-height: 36px;
+    letter-spacing: -1.5px;
+  }
+
+  .Headings-H2 {
+    font-size: 28px;
+    line-height: 32px;
+    letter-spacing: -1px;
+  }
+  .Headings-H3 {
+    font-size: 24px;
+    line-height: 28px;
+  }
+  .Headings-H4 {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .Headings-H5 {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .Headings-H6 {
+    font-size: 18px;
+  }
+
+  .Headings-H7 {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.5px;
+  }
+  .Text-XL {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .embla__slide {
+    max-width: 360px;
+    margin: 0 10px;
+  }
+
+  .embla__slide:not(.is-snapped) {
+    margin: 0;
+  }
+}
+
+/* Success Page Animations */
+@keyframes draw {
+  from {
+    stroke-dasharray: 0 100;
+  }
+  to {
+    stroke-dasharray: 100 100;
+  }
+}
+
+.animate-draw {
+  animation: draw 1.5s ease-out forwards;
+  stroke-dasharray: 0 100;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Success page entrance animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Toast Animations */
+.toaster {
+  --toast-animation-duration: 0.3s;
+}
+
+.toaster [data-sonner-toast] {
+  animation: toastSlideIn var(--toast-animation-duration)
+    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toaster [data-sonner-toast][data-state="closed"] {
+  animation: toastSlideOut var(--toast-animation-duration)
+    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+.section-container {
+  display: flex;
+  max-width: 1180px;
+  padding: 132px 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+}
+.shadow-card {
+  box-shadow:
+    0 1px 3px -1px rgba(140, 140, 140, 0.1),
+    0 1px 6px 0 rgba(140, 140, 140, 0.1);
+}
+
+/* WhatsApp Widget Professional Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Fix navigation contrast issues - override inline styles */
+nav ul li.text-white a[href="/"] {
+  color: white !important;
+  background-color: transparent !important;
+}
+
+/* More specific selector for all navigation links */
+nav[role="navigation"] ul li.text-white a {
+  color: white !important;
+  background-color: transparent !important;
+}
+
+/* Even more specific - target the exact structure */
+/* CHANGED FOR NEXT.JS 16 COMPATIBILITY - 2025-12-12
+   Original (caused CSS parsing error):
+   .max-tablet\\:justify-end nav ul li.text-white a {
+     color: white !important;
+     background-color: transparent !important;
+   }
+   
+   Replaced with media query that does the same thing:
+*/
+@media (max-width: 770px) {
+  nav ul li.text-white a {
+    color: white !important;
+    background-color: transparent !important;
+  }
+}
+
+/* Nuclear option - target by data attribute */
+li[data-href="/"] a {
+  color: white !important;
+  background-color: transparent !important;
+}
+
+/* Ensure active navigation has proper background */
+nav ul li.text-white {
+  background-color: var(--color-Neutral-Dark) !important;
+  z-index: 20;
+}
+
+/* Alternative: if the span isn't working, give active item its own background */
+nav ul li.text-white.z-20 {
+  background-color: var(--color-Neutral-Dark) !important;
+}
+
+/* Fix select placeholder contrast issues */
+[data-slot="select-value"] {
+  color: #5a5a5a !important; /* Darker gray for better contrast */
+}
+
+/* Fix carriere page file upload text contrast */
+.text-Neutral-BG-4.button2-s {
+  color: #5a5a5a !important; /* Darker gray for better contrast */
+}
+
+/* Fix navigation contrast - ensure inactive items use dark text */
+nav ul li:not(.text-white) a {
+  color: var(--color-Neutral-Dark) !important;
+}
+
+/* Specific fix for Particuliers navigation when not active */
+li[data-href="/"]:not(.text-white) a {
+  color: var(--color-Neutral-Dark) !important;
+}
+
+/* FIX OKLAB PARSING ERRORS - Add sRGB fallbacks for accessibility tools */
+/* Critical: Provide sRGB fallbacks before oklab() values so axe-core/Lighthouse can parse them */
+
+/* Hero section backgrounds - most critical for parsing errors */
+.bg-black\/25,
+.bg-black\/70,
+.bg-white\/10,
+.bg-white\/20 {
+  /* sRGB fallbacks for accessibility tools */
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+.bg-black\/70 {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.bg-white\/20 {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Text colors with opacity - critical for contrast parsing */
+.text-white\/70,
+.text-white\/80,
+.text-white\/90 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.text-white\/80 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.text-white\/90 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "TRT Broker - Courtier en Assurance au Maroc",
+  "short_name": "TRT Broker",
+  "description": "Courtier en assurance au Maroc avec +40 ans d'expertise. Solutions d'assurance pour particuliers, professionnels et entreprises.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#739A38",
+  "orientation": "portrait-primary",
+  "lang": "fr-MA",
+  "dir": "ltr",
+  "scope": "/",
+  "categories": ["finance", "business"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
