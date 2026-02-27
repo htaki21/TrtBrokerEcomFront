@@ -46,6 +46,11 @@
 }
 
 @theme inline {
+  --shadow-soft:
+    0 1px 3px 0 rgba(58, 64, 49, 0.02), 0 3px 8px -2px rgba(58, 64, 49, 0.03);
+  --shadow-lg:
+    0 4px 6px -4px rgba(140, 140, 140, 0.1),
+    0 10px 15px -3px rgba(140, 140, 140, 0.1);
   --animate-scroller: infinite-loop-scroll 20s linear infinite;
 
   @keyframes infinite-loop-scroll {
@@ -94,6 +99,7 @@
   --color-Primary-600: #4f6f24;
   --color-Primary-300: #c2d4a8;
   --color-Brand-600: #426015;
+  --color-Brand-500: #739A38;
   --color-Text-Body: #5a5a5a; /*odld :  --color-Text-Body: #8c8c8c; */
   --color-Text-Body-2: #545454;
   --color-Sage-Gray-High: #53564d; /* old  --color-Sage-Gray-High: #868c7d; */
@@ -318,6 +324,7 @@ body {
 
 body {
   font-family: var(--font-sans), sans-serif;
+  color: var(--color-Neutral-Dark);
   min-width: 100% !important;
 }
 
@@ -943,11 +950,6 @@ nav ul li.text-white.z-20 {
 /* Fix carriere page file upload text contrast */
 .text-Neutral-BG-4.button2-s {
   color: #5a5a5a !important; /* Darker gray for better contrast */
-}
-
-/* Fix navigation contrast - ensure inactive items use dark text */
-nav ul li:not(.text-white) a {
-  color: var(--color-Neutral-Dark) !important;
 }
 
 /* Specific fix for Particuliers navigation when not active */

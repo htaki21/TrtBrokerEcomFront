@@ -43,7 +43,7 @@ export default function Header() {
           onClose={() => setMobileMenuOpen(false)}
         />
       </div>
-      <NavigationLinks className="hidden z-[49] max-tablet:w-full relative max-tablet:flex" />
+      {/* <NavigationLinks className="hidden z-[49] max-tablet:w-full relative max-tablet:flex" /> */}
     </header>
   );
 }

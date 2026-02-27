@@ -50,7 +50,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
       )}
 
       {(heading || description) && (
-        <div className="f-col w-full gap-4 max-mobile:gap-3 text-center">
+        <div className="f-col items-center w-full gap-4 max-mobile:gap-3 text-center">
           {heading && (
             <h2
               className={twMerge(

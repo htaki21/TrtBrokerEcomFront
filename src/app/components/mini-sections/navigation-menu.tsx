@@ -66,7 +66,7 @@ export function NavigationMenuDemo() {
         <NavigationMenuItem>
           <Link
             href="/assurance-habitation"
-            className={`inline-flex h-9 w-max items-center justify-center rounded-full px-4 py-2 text-sm font-normal transition-colors duration-200 hover:bg-Sage-Gray-Lower hover:text-Neutral-Dark ${
+            className={`inline-flex h-9 w-max items-center justify-center rounded-full px-3 py-2 text-sm font-normal transition-colors duration-200 hover:bg-Sage-Gray-Lower hover:text-Neutral-Dark ${
               pathname === "/assurance-habitation" ? "bg-Sage-Gray-Lower" : ""
             }`}
           >
