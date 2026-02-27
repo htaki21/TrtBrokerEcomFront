@@ -1,5 +1,7 @@
 import Footer from "../components/footer/footer";
 import Header from "../components/header/header";
+import { PopupProvider } from "../components/popup/PopupContext";
+import PopupSearch from "../components/popup/PopupSearch";
 
 export default function WithHeaderLayout({
   children,
@@ -7,7 +9,7 @@ export default function WithHeaderLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <PopupProvider>
       {/* Skip to main content link for accessibility */}
       <a
         href="#main-content"
@@ -20,6 +22,8 @@ export default function WithHeaderLayout({
         {children}
       </main>
       <Footer />
-    </>
+      {/* Global Popup */}
+      <PopupSearch />
+    </PopupProvider>
   );
 }

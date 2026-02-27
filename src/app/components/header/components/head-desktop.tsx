@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import ButtonLink from "../../buttons/ButtonLink";
 import { BurgerMenuIcon } from "../../icons/Burger-Menu";
 import { Logosvg } from "../../logo/logo";
@@ -10,6 +10,7 @@ import { NavigationMenuDemo } from "../../mini-sections/navigation-menu";
 import Wrapper1180 from "../../wrapper/wrapper-1180";
 import { SVGProps } from "react";
 import Link from "next/link";
+import { usePopup } from "../../popup/PopupContext";
 
 export function IconSearch(props: SVGProps<SVGSVGElement>) {
   return (
@@ -88,10 +89,12 @@ interface HeaderDesktopProps {
 }
 
 const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
+  const { open } = usePopup();
   const pathname = usePathname();
   // Pick variant based on pathname
   const variant: HeaderVariant = useMemo(() => {
-    if (pathname?.toLowerCase().includes("assurance-professionnelle")) return "red";
+    if (pathname?.toLowerCase().includes("assurance-professionnelle"))
+      return "red";
     if (pathname?.toLowerCase().includes("assurance-entreprise")) return "blue";
     return "green"; // default
   }, [pathname]);
@@ -136,10 +139,16 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
           <NavigationLinks />
           <div className="text-button-s flex items-center gap-1">
             {shouldShowRightNav && <NavigationMenuDemo />}
-            <span className="flex p-2 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer">
+            <button
+              onClick={open}
+              className="flex p-2 outline-none rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
+            >
               <IconSearch className=" shrink-0" />
-            </span>
-            <Link href="/drafts" className="relative flex p-2 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer">
+            </button>
+            <Link
+              href="/drafts"
+              className="relative flex p-2 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
+            >
               <span
                 className="absolute -top-2 -right-2 rounded-full bg-Brand-500
                text-[11px] leading-[16px] font-medium text-white size-5 flex-center"
