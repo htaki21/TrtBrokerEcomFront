@@ -1,7 +1,11 @@
+"use client"
+
 import Link from "next/link";
 import { Logosvg } from "../components/logo/logo";
+import { usePopup } from "../components/popup/PopupContext";
 
 export default function FormHeader() {
+  const { open } = usePopup();
   return (
     <header className="w-full max-w-[1180px] max-laptop:px-4 m-auto flex items-center justify-between gap-2 max-mobile:justify-end max-tablet:py-3 pt-[24px] pb-[12px]">
       <Link
@@ -40,9 +44,10 @@ export default function FormHeader() {
       <div className="max-mobile:order-1 max-mobile:flex-1">
         <Logosvg href="/" className="max-mobile:w-[111px]" variant="green" />
       </div>
-      <Link
-        href="/"
-        className="hover:bg-Sage-Gray-Low bg-transparent transition-colors max-mobile:order-3 flex cursor-pointer rounded-full p-[12px]"
+      <button
+        type="button"
+        onClick={() => open("Enregistrer")}
+        className="outline-none hover:bg-Sage-Gray-Low bg-transparent transition-colors max-mobile:order-3 flex cursor-pointer rounded-full p-[12px]"
       >
         <svg
           width="24"
@@ -57,7 +62,7 @@ export default function FormHeader() {
             fill="black"
           />
         </svg>
-      </Link>
+      </button>
     </header>
   );
 }

@@ -140,7 +140,7 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
           <div className="text-button-s flex items-center gap-1">
             {shouldShowRightNav && <NavigationMenuDemo />}
             <button
-              onClick={() => open("search")}
+              onClick={() => open("Search")}
               className="flex p-2 outline-none rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
             >
               <IconSearch className=" shrink-0" />

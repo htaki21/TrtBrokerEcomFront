@@ -3,6 +3,8 @@
 import { Checkbox } from "@heroui/checkbox";
 import FormInput from "../../components/inputs/form-input";
 import { useFormContext } from "../context";
+import { useState } from "react";
+import PaymentSelector from "@/app/components/PaymentSelector";
 const timeSlots = [
   { value: "08:30 – 09:00", label: "08:30 – 09:00" },
   { value: "09:00 – 09:30", label: "09:00 – 09:30" },
@@ -15,6 +17,9 @@ const timeSlots = [
   { value: "10:30 – 11:00", label: "10:30 – 11:00" },
 ];
 export default function Step3() {
+  const [paymentMethod, setPaymentMethod] = useState<
+    "Paiement en agence" | "Virement bancaire"
+  >("Paiement en agence");
   const { data, setData } = useFormContext();
 
   const handleMarketingConsent = (checked: boolean) => {
@@ -173,6 +178,19 @@ export default function Step3() {
           d&apos;utilisation, notamment la mention relative à la protection des
           données personnelles.
         </Checkbox>
+      </div>
+      <div className="f-col gap-4">
+        <h2 className="Button-M">Mode de paiement</h2>
+        <PaymentSelector
+          value={paymentMethod}
+          onChange={(id) =>
+            setPaymentMethod(
+              id === "Virement bancaire"
+                ? "Virement bancaire"
+                : "Paiement en agence",
+            )
+          }
+        />
       </div>
     </div>
   );

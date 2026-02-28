@@ -1,3 +1,7 @@
+"use client"
+
+import { usePopup } from "@/app/components/popup/PopupContext";
+import PopupSupprimerledevis from "@/app/components/popup/PopupSupprimerledevis";
 import Wrapper1180 from "@/app/components/wrapper/wrapper-1180";
 import { SVGProps } from "react";
 
@@ -70,6 +74,7 @@ export function IconQuestion(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function DraftsPage() {
+  const { open } = usePopup();
   return (
     <section className="w-full pt-5 px-4">
       <Wrapper1180 className="pt-[132px] gap-9 max-tablet:gap-5 max-tablet:py-6">
@@ -101,7 +106,10 @@ export default function DraftsPage() {
                 </div>
               </div>
               <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                <IconTrash className=" shrink-0" />
+                <IconTrash
+                  onClick={() => open("Supprimer le devis")}
+                  className=" shrink-0"
+                />
               </span>
             </div>
             <div className="f-col gap-2">
@@ -230,6 +238,7 @@ export default function DraftsPage() {
           </div>
         </div>
       </Wrapper1180>
+      <PopupSupprimerledevis />
     </section>
   );
 }

@@ -237,7 +237,7 @@ export function Iconblockquoteline(props: SVGProps<SVGSVGElement>) {
 
 export default function PopupSearch() {
   const { activePopup, close } = usePopup();
-  const isOpen = activePopup === "search";
+  const isOpen = activePopup === "Search";
   const [value, setValue] = useState("");
 
   const clear = () => setValue("");
