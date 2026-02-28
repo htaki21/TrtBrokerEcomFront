@@ -1,23 +1,24 @@
 "use client";
+import { createContext, useContext, useState } from "react";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+type PopupType = "search" | "Enregistrer" | "Supprimer le devis" | null;
 
-type PopupContextType = {
-  open: () => void;
+interface PopupContextType {
+  activePopup: PopupType;
+  open: (popup: PopupType) => void;
   close: () => void;
-  isOpen: boolean;
-};
+}
 
-const PopupContext = createContext<PopupContextType | null>(null);
+const PopupContext = createContext<PopupContextType | undefined>(undefined);
 
-export function PopupProvider({ children }: { children: ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+export function PopupProvider({ children }: { children: React.ReactNode }) {
+  const [activePopup, setActivePopup] = useState<PopupType>(null);
 
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
+  const open = (popup: PopupType) => setActivePopup(popup);
+  const close = () => setActivePopup(null);
 
   return (
-    <PopupContext.Provider value={{ open, close, isOpen }}>
+    <PopupContext.Provider value={{ activePopup, open, close }}>
       {children}
     </PopupContext.Provider>
   );
@@ -25,8 +26,6 @@ export function PopupProvider({ children }: { children: ReactNode }) {
 
 export function usePopup() {
   const context = useContext(PopupContext);
-  if (!context) {
-    throw new Error("usePopup must be used inside PopupProvider");
-  }
+  if (!context) throw new Error("usePopup must be used within PopupProvider");
   return context;
 }

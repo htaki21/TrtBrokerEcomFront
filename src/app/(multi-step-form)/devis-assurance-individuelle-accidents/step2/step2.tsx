@@ -1,8 +1,12 @@
+"use cleint";
+
 import { Checkbox } from "@heroui/checkbox";
 import { Calendar24 } from "../../components/date-picker-shadcn";
 import FormInput from "../../components/inputs/form-input";
 import { SelectScrollable } from "../../components/select-scroll";
 import { useFormContext } from "../context";
+import PaymentSelector from "@/app/components/PaymentSelector";
+import { useState } from "react";
 
 const formuleAccidents = [
   { value: "Formule Basique", label: "Formule Basique - 312,50 DH" },
@@ -22,6 +26,9 @@ const timeSlots = [
 ];
 
 export default function Step2() {
+  const [paymentMethod, setPaymentMethod] = useState<
+    "Paiement en agence" | "Virement bancaire"
+  >("Paiement en agence");
   const { data, setData } = useFormContext();
 
   const handleMarketingConsent = (checked: boolean) => {
@@ -153,6 +160,19 @@ export default function Step2() {
           d&apos;utilisation, notamment la mention relative à la protection des
           données personnelles.
         </Checkbox>
+      </div>
+      <div className="f-col gap-4">
+        <h2 className="Button-M">Mode de paiement</h2>
+        <PaymentSelector
+          value={paymentMethod}
+          onChange={(id) =>
+            setPaymentMethod(
+              id === "Virement bancaire"
+                ? "Virement bancaire"
+                : "Paiement en agence",
+            )
+          }
+        />
       </div>
     </div>
   );
