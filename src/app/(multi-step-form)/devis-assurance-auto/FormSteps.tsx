@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavigationButtons from "../navigation-buttons";
 import { useFormContext } from "./context";
 import Step1 from "./step1/step1";
@@ -17,6 +17,7 @@ import Step6 from "./step6/step6";
 import step6Data from "./step6/stepInfo";
 import Step7 from "./step7/step7";
 import step7Data from "./step7/stepInfo";
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 
 export default function FormSteps() {
   const { data } = useFormContext(); // ✅ safe, inside provider
@@ -70,7 +71,7 @@ export default function FormSteps() {
         const actualStepIndex = filteredStepIndices[uiStepIndex];
         const isValid = originalContext.isStepValid(actualStepIndex);
         console.log(
-          `Validation: UI Step ${uiStepIndex} -> Actual Step ${actualStepIndex}, Valid: ${isValid}`
+          `Validation: UI Step ${uiStepIndex} -> Actual Step ${actualStepIndex}, Valid: ${isValid}`,
         );
         return isValid;
       },
@@ -90,6 +91,23 @@ export default function FormSteps() {
       setCurrentStepIndex((i) => i - 1);
     }
   };
+
+  const { registerDraftData } = useDraft();
+  // 🔥 REGISTER DRAFT DATA HERE
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      registerDraftData({
+        product: "devis-assurance-auto",
+        productName: "Assurance Auto",
+        formData: data,
+        currentStep: currentStepIndex + 1,
+        totalSteps: stepsCount,
+        title: currentStep?.title ?? "",
+      });
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeout);
+  }, [currentStepIndex, data, stepsCount, registerDraftData]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">

@@ -21,6 +21,7 @@ export interface Draft {
   status: DraftStatus;
   updatedAt: string;
   formData: any;
+  title: string;
 }
 
 const KEY = "drafts";

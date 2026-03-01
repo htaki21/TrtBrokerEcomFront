@@ -3,8 +3,8 @@
 import { usePopup } from "@/app/components/popup/PopupContext";
 import PopupSupprimerledevis from "@/app/components/popup/PopupSupprimerledevis";
 import Wrapper1180 from "@/app/components/wrapper/wrapper-1180";
-import { SVGProps, useEffect, useState } from "react";
-import { Draft, getDrafts } from "./draftManager";
+import { SVGProps } from "react";
+import { useDraft } from "./DraftContext";
 
 export function IconTrash(props: SVGProps<SVGSVGElement>) {
   return (
@@ -75,12 +75,9 @@ export function IconQuestion(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function DraftsPage() {
+  const { drafts } = useDraft(); // use global reactive drafts
   const { open } = usePopup();
-  const [drafts, setDrafts] = useState<Draft[]>([]);
 
-  useEffect(() => {
-    setDrafts(getDrafts());
-  }, []);
   return (
     <section className="w-full pt-5 px-4">
       <Wrapper1180 className="pt-[132px] gap-9 max-tablet:gap-5 max-tablet:py-6">
@@ -97,7 +94,7 @@ export default function DraftsPage() {
             return (
               <li
                 key={draft.id}
-                className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col justify-between gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower"
+                className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower"
               >
                 <div className="flex items-start justify-between gap-1">
                   <div className="f-col gap-2">
@@ -134,7 +131,12 @@ export default function DraftsPage() {
 
                   {/* Right icon */}
                   {draft.status === "EN_COURS" ? (
-                    <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
+                    <span
+                      onClick={() =>
+                        open("Supprimer le devis", { draftId: draft.id })
+                      }
+                      className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer"
+                    >
                       <IconTrash className="shrink-0" />
                     </span>
                   ) : (
@@ -153,7 +155,6 @@ export default function DraftsPage() {
                       </span>
                       <span>{Math.round(progress)}%</span>
                     </div>
-
                     <span className="relative">
                       <span
                         style={{ width: `${progress}%` }}
@@ -161,6 +162,7 @@ export default function DraftsPage() {
                       ></span>
                       <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
                     </span>
+                    <h3 className="button-s">{draft.title}</h3>
                   </div>
                 ) : (
                   <div className="f-col gap-1 button2-s text-Sage-Gray-Higher">
@@ -192,7 +194,6 @@ export default function DraftsPage() {
     </section>
   );
 }
-
 
 const formatDate = (date: string) => {
   const diff = (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24);

@@ -7,6 +7,7 @@ import Script from "next/script";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { PopupProvider } from "./components/popup/PopupContext";
+import { DraftProvider } from "./(with-header)/(pages)/drafts/DraftContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -197,37 +198,39 @@ export default function RootLayout({
             __html: JSON.stringify(websiteData),
           }}
         />
-        <PopupProvider>
-          <HeroUIProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 5000,
-                style: {
-                  background: "#363636",
-                  color: "#fff",
-                  zIndex: 9999,
-                },
-                success: {
+        <DraftProvider>
+          <PopupProvider>
+            <HeroUIProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
                   duration: 5000,
                   style: {
-                    background: "#10B981",
+                    background: "#363636",
                     color: "#fff",
+                    zIndex: 9999,
                   },
-                },
-                error: {
-                  duration: 5000,
-                  style: {
-                    background: "#EF4444",
-                    color: "#fff",
+                  success: {
+                    duration: 5000,
+                    style: {
+                      background: "#10B981",
+                      color: "#fff",
+                    },
                   },
-                },
-              }}
-            />
-            <WhatsAppWidget />
-          </HeroUIProvider>
-        </PopupProvider>
+                  error: {
+                    duration: 5000,
+                    style: {
+                      background: "#EF4444",
+                      color: "#fff",
+                    },
+                  },
+                }}
+              />
+              <WhatsAppWidget />
+            </HeroUIProvider>
+          </PopupProvider>
+        </DraftProvider>
       </body>
     </html>
   );

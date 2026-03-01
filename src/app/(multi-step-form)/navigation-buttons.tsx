@@ -4,7 +4,7 @@ import { ArrowIcon } from "@/app/components/icons/ArrowIcon";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
-import { useDraft } from "./DraftContext";
+import { useDraft } from "../(with-header)/(pages)/drafts/DraftContext";
 
 interface NavigationButtonsProps<T> {
   history?: string[];

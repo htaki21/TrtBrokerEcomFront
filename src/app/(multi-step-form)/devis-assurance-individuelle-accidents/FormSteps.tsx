@@ -7,13 +7,9 @@ import Step1 from "./step1/step1";
 import step1Data from "./step1/stepInfo";
 import Step2 from "./step2/step2";
 import step2Data from "./step2/stepInfo";
-import { useDraft } from "../DraftContext";
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 
 export default function FormSteps() {
-  const { data } = useFormContext();
-  const { registerDraftData } = useDraft();
-
-  useFormContext(); // ✅ safe, inside provider
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const stepDataList = [step1Data, step2Data];
@@ -40,6 +36,8 @@ export default function FormSteps() {
 
   // const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
 
+  const { data } = useFormContext();
+  const { registerDraftData } = useDraft();
   // 🔥 REGISTER DRAFT DATA HERE
   useEffect(() => {
     registerDraftData({
@@ -48,6 +46,7 @@ export default function FormSteps() {
       formData: data,
       currentStep: currentStepIndex + 1, // +1 because index starts at 0
       totalSteps: stepsCount,
+      title: "",
     });
   }, []); // only once on mount
 

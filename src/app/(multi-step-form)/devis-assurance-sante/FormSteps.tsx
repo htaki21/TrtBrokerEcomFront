@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavigationButtons from "../navigation-buttons";
 import { useFormContext } from "./context";
 import Step1 from "./step1/step1";
@@ -9,9 +9,10 @@ import Step2 from "./step2/step2";
 import step2Data from "./step2/stepInfo";
 import Step3 from "./step3/step3";
 import step3Data from "./step3/stepInfo";
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 
 export default function FormSteps() {
-  useFormContext(); // ✅ safe, inside provider
+  const { data } = useFormContext(); // ✅ safe, inside provider
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const stepDataList = [step1Data, step2Data, step3Data];
@@ -39,6 +40,23 @@ export default function FormSteps() {
       setCurrentStepIndex((i) => i - 1);
     }
   };
+
+  const { registerDraftData } = useDraft();
+  // 🔥 REGISTER DRAFT DATA HERE
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      registerDraftData({
+        product: "devis-assurance-sante",
+        productName: "Assurance Santé",
+        formData: data,
+        currentStep: currentStepIndex + 1,
+        totalSteps: stepsCount,
+        title: currentStep?.title ?? "",
+      });
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeout);
+  }, [currentStepIndex, data, stepsCount, registerDraftData]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">

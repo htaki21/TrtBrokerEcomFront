@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "./context";
 import NavigationButtons from "../navigation-buttons";
 import Step1 from "./step1/step1";
@@ -11,7 +11,7 @@ import Step3 from "./step3/step3";
 import step3Data from "./step3/stepInfo";
 import Step4 from "./step4/step4";
 import step4Data from "./step4/stepInfo";
-
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 
 export default function FormSteps() {
   const { data } = useFormContext(); // ✅ safe, inside provider
@@ -19,7 +19,12 @@ export default function FormSteps() {
 
   const stepDataList = [step1Data, step2Data, step3Data, step4Data];
 
-  const steps = [<Step1 key="step1" />, <Step2 key="step2" />, <Step3 key="step3" />, <Step4 key="step4" />];
+  const steps = [
+    <Step1 key="step1" />,
+    <Step2 key="step2" />,
+    <Step3 key="step3" />,
+    <Step4 key="step4" />,
+  ];
 
   // Define step indices
   const allStepIndices = stepDataList.map((_, i) => i);
@@ -49,6 +54,23 @@ export default function FormSteps() {
       setCurrentStepIndex((i) => i - 1);
     }
   };
+
+  const { registerDraftData } = useDraft();
+  // 🔥 REGISTER DRAFT DATA HERE
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      registerDraftData({
+        product: "devis-assurance-moto",
+        productName: "Assurance Moto",
+        formData: data,
+        currentStep: currentStepIndex + 1,
+        totalSteps: stepsCount,
+        title: currentStep?.title ?? "",
+      });
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeout);
+  }, [currentStepIndex, data, stepsCount, registerDraftData]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">

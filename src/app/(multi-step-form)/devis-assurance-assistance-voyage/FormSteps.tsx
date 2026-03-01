@@ -1,25 +1,38 @@
 "use client";
 
 import { ArrowIcon } from "@/app/components/icons/ArrowIcon";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import NavigationButtons from "../navigation-buttons";
 import { useFormContext } from "./context";
 
+// ✅ Import steps & data
+import DureeDeLaCouverture from "./branches/duree-de-la-couverture";
+import PrimeDeLAssistance from "./branches/prime-de-lassistance";
+import SituationFamiliale from "./branches/situation-familiale";
+import Transport from "./branches/transport";
+import Step1 from "./step1/step1";
+import step1Data from "./step1/stepInfo";
+import Step2 from "./step2/step2";
+import step2Data from "./step2/stepInfo";
+import Step3 from "./step3/step3";
+import step3Data from "./step3/stepInfo";
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
+
 // Submit button component for final steps
-function FinalStepSubmitButton({ 
-  currentStepId, 
-  onPrev 
-}: { 
+function FinalStepSubmitButton({
+  currentStepId,
+  onPrev,
+}: {
   currentStepId: string;
   onPrev: () => void;
 }) {
   const { submitForm, isFormValid, isSubmitting } = useFormContext();
-
+  const { completeDraft } = useDraft();
   const handleSubmit = async () => {
     if (!isFormValid(currentStepId)) {
       toast.error(
-        "Veuillez compléter tous les champs obligatoires avant de procéder à la soumission de votre demande."
+        "Veuillez compléter tous les champs obligatoires avant de procéder à la soumission de votre demande.",
       );
       return;
     }
@@ -29,22 +42,25 @@ function FinalStepSubmitButton({
         const result = await submitForm(currentStepId);
 
         if (result.success) {
+          // 🔹 Mark draft as VALIDE
+          completeDraft();
+
           toast.success(
-            "Votre demande d'assistance voyage a été transmise avec succès. Notre équipe d'experts vous contactera dans les plus brefs délais pour personnaliser votre couverture."
+            "Votre demande d'assistance voyage a été transmise avec succès. Notre équipe d'experts vous contactera dans les plus brefs délais pour personnaliser votre couverture.",
           );
           // Handle success - redirect to success page
           setTimeout(() => {
             window.location.href = "/success";
-          }, 2000);
+          }, 1000);
         } else {
           toast.error(
             result.error ||
-              "Une erreur technique s'est produite lors du traitement de votre demande d'assistance voyage. Veuillez réessayer ou contacter notre service client."
+              "Une erreur technique s'est produite lors du traitement de votre demande d'assistance voyage. Veuillez réessayer ou contacter notre service client.",
           );
         }
       } catch {
         toast.error(
-          "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client."
+          "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client.",
         );
       }
     }
@@ -84,18 +100,6 @@ function FinalStepSubmitButton({
     </div>
   );
 }
-
-// ✅ Import steps & data
-import DureeDeLaCouverture from "./branches/duree-de-la-couverture";
-import PrimeDeLAssistance from "./branches/prime-de-lassistance";
-import SituationFamiliale from "./branches/situation-familiale";
-import Transport from "./branches/transport";
-import Step1 from "./step1/step1";
-import step1Data from "./step1/stepInfo";
-import Step2 from "./step2/step2";
-import step2Data from "./step2/stepInfo";
-import Step3 from "./step3/step3";
-import step3Data from "./step3/stepInfo";
 
 // -------------------------------------------
 // STEP CONFIG (branching logic)
@@ -228,11 +232,11 @@ export default function FormSteps() {
       id.startsWith("a") ||
       id.startsWith("b") ||
       id.startsWith("c") ||
-      id.startsWith("d")
+      id.startsWith("d"),
   );
 
   const totalBranchSteps = Object.keys(stepConfig).filter(
-    (id) => id.startsWith(currentStepId[0]) // A, B, C, or D branch
+    (id) => id.startsWith(currentStepId[0]), // A, B, C, or D branch
   ).length;
 
   const progressPercent = isBranchStep
@@ -270,6 +274,19 @@ export default function FormSteps() {
       setCurrentStepId(prevId as keyof typeof stepConfig);
     }
   };
+
+  const { registerDraftData } = useDraft();
+
+  useEffect(() => {
+    registerDraftData({
+      product: "devis-assurance-assistance-voyage",
+      productName: "Assistance Voyage",
+      formData: data,
+      currentStep: branchStepsVisited.length,
+      totalSteps: totalBranchSteps,
+      title: isBranchStep ? (currentStep?.title ?? "") : "",
+    });
+  }, [currentStepId, history.length]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">
@@ -360,7 +377,10 @@ export default function FormSteps() {
             />
           ) : (
             // Show submit button for final steps
-            <FinalStepSubmitButton currentStepId={currentStepId} onPrev={handlePrev} />
+            <FinalStepSubmitButton
+              currentStepId={currentStepId}
+              onPrev={handlePrev}
+            />
           )}
         </div>
       </div>

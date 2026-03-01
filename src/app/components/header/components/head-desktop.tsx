@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ButtonLink from "../../buttons/ButtonLink";
 import { BurgerMenuIcon } from "../../icons/Burger-Menu";
 import { Logosvg } from "../../logo/logo";
@@ -11,6 +11,8 @@ import Wrapper1180 from "../../wrapper/wrapper-1180";
 import { SVGProps } from "react";
 import Link from "next/link";
 import { usePopup } from "../../popup/PopupContext";
+import { getDrafts } from "@/app/(with-header)/(pages)/drafts/draftManager";
+import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
 
 export function IconSearch(props: SVGProps<SVGSVGElement>) {
   return (
@@ -124,6 +126,10 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
     red: "bg-Secondary-Red-Lowest", // adjust to your theme color
     blue: "bg-Secondary-Blue-Lowest", // adjust to your theme color
   };
+
+  const { drafts } = useDraft();
+  const draftCount = drafts.length;
+
   return (
     <div
       className={`relative z-10 flex w-full items-center justify-center ${bgColor[variant]}`}
@@ -149,13 +155,15 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
               href="/drafts"
               className="relative flex p-2 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
             >
-              <span
-                className="absolute -top-2 -right-2 rounded-full bg-Brand-500
-               text-[11px] leading-[16px] font-medium text-white size-5 flex-center"
-              >
-                12
-              </span>
-              <Iconshoppingcart className=" shrink-0" />
+              {draftCount > 0 && (
+                <span
+                  className="absolute -top-2 -right-2 rounded-full bg-Brand-500
+           text-[11px] leading-[16px] font-medium text-white size-5 flex-center"
+                >
+                  {draftCount}
+                </span>
+              )}
+              <Iconshoppingcart className="shrink-0" />
             </Link>
             <span className="flex p-2 rounded-full bg-BG-BG-3-3 hover:bg-Sage-Gray-Higher transition cursor-pointer">
               <Iconuser className=" shrink-0" />

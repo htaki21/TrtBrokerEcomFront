@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { usePopup } from "./PopupContext";
 import { SVGProps } from "react";
+import { deleteDraft } from "@/app/(with-header)/(pages)/drafts/draftManager";
+import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
 
 export function IconDelete(props: SVGProps<SVGSVGElement>) {
   return (
@@ -42,7 +44,8 @@ export function IconX(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function PopupSupprimerledevis() {
-  const { activePopup, close } = usePopup();
+  const { activePopup, payload, close } = usePopup();
+  const { deleteDraft } = useDraft(); // use context directly
   const isOpen = activePopup === "Supprimer le devis";
 
   // Close on ESC
@@ -102,6 +105,10 @@ export default function PopupSupprimerledevis() {
             Annuler
           </button>
           <button
+            onClick={() => {
+              if (payload?.draftId) deleteDraft(payload.draftId); // directly updates context
+              close();
+            }}
             type="button"
             className="py-2 px-4 flex-center flex-1 rounded-full bg-Secondary-Red-Medium hover:bg-Secondary-Red-Higher transition cursor-pointer text-white"
           >

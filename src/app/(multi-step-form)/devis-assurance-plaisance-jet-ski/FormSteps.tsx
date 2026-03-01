@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NavigationButtons from "../navigation-buttons";
 import { useFormContext } from "./context";
 import Step1 from "./step1/step1";
@@ -13,9 +13,10 @@ import Step4 from "./step4/step4";
 import step4Data from "./step4/stepInfo";
 import Step5 from "./step5/step5";
 import step5Data from "./step5/stepInfo";
+import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 
 export default function FormSteps() {
-  useFormContext(); // ✅ safe, inside provider
+  const { data } = useFormContext(); // ✅ safe, inside provider
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const stepDataList = [step1Data, step2Data, step3Data, step4Data, step5Data];
@@ -45,6 +46,23 @@ export default function FormSteps() {
       setCurrentStepIndex((i) => i - 1);
     }
   };
+
+  const { registerDraftData } = useDraft();
+  // 🔥 REGISTER DRAFT DATA HERE
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      registerDraftData({
+        product: "devis-assurance-plaisance-jet-ski",
+        productName: "Assurance Plaisance / Jet Ski",
+        formData: data,
+        currentStep: currentStepIndex + 1,
+        totalSteps: stepsCount,
+        title: currentStep?.title ?? "",
+      });
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeout);
+  }, [currentStepIndex, data, stepsCount, registerDraftData]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">
