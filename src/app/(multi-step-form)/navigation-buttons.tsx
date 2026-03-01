@@ -4,6 +4,7 @@ import { ArrowIcon } from "@/app/components/icons/ArrowIcon";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
+import { useDraft } from "./DraftContext";
 
 interface NavigationButtonsProps<T> {
   history?: string[];
@@ -83,67 +84,71 @@ export default function NavigationButtons<
     }
   }, [currentStepIndex, history, onPrev]);
 
+  const { completeDraft } = useDraft();
+
   const handleSubmit = useCallback(async () => {
     if (!isFormValid()) {
       toast.error(
-        "Veuillez compléter tous les champs obligatoires avant de procéder à la soumission."
+        "Veuillez compléter tous les champs obligatoires avant de procéder à la soumission.",
       );
       return;
     }
 
     try {
       if (submitForm) {
-        // Use context submit function if available (professional implementation)
         try {
           const result = await submitForm();
 
           if (result.success) {
+            // 🔹 Mark draft as VALIDE
+            completeDraft();
+
             showSuccess(
               result.message ||
-                "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais."
+                "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais.",
             );
-            // Redirect to success page after successful submission
+
             setTimeout(() => {
               router.push(getSuccessPagePath());
-            }, 3000); // Longer delay to show the success message
+            }, 1000);
           } else {
-            // RED TOAST for errors
             showError(
               result.error ||
                 result.message ||
-                "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client."
+                "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client.",
             );
           }
         } catch {
-          // RED TOAST for errors
           showError(
-            "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client."
+            "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client.",
           );
-          return; // Exit early to prevent success toast
+          return;
         }
       } else {
-        // Fallback for forms without submitForm
         setLocalIsSubmitting(true);
+
+        // 🔹 Mark draft as VALIDE even for fallback forms
+        completeDraft();
+
         showSuccess(
-          "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais."
+          "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais.",
         );
-        // Redirect to success page for fallback forms too
+
         setTimeout(() => {
           router.push(getSuccessPagePath());
         }, 3000);
       }
     } catch {
-      // RED TOAST for errors
       showError(
-        "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client."
+        "Une erreur technique s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter notre service client.",
       );
-      return; // Exit early to prevent success toast
+      return;
     } finally {
       if (!submitForm) {
         setLocalIsSubmitting(false);
       }
     }
-  }, [isFormValid, submitForm, router, getSuccessPagePath]);
+  }, [isFormValid, submitForm, router, getSuccessPagePath, completeDraft]);
 
   // Helper function to check if we're on a final step
   const isFinalStep = (stepId: string | undefined): boolean => {

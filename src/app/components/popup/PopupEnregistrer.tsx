@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { usePopup } from "./PopupContext";
 import { SVGProps } from "react";
 import { IconX } from "./PopupSupprimerledevis";
+import { useDraft } from "@/app/(multi-step-form)/DraftContext";
+
 
 export function IconAlert(props: SVGProps<SVGSVGElement>) {
   return (
@@ -26,6 +28,7 @@ export function IconAlert(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function PopupEnregistrer() {
+  const { saveAndExit } = useDraft();
   const { activePopup, close } = usePopup();
   const isOpen = activePopup === "Enregistrer";
 
@@ -80,7 +83,10 @@ export default function PopupEnregistrer() {
         <div className="f-col gap-3">
           <div className="flex gap-2 button-s">
             <button
-              onClick={close}
+              onClick={() => {
+                saveAndExit();
+                close(); // close popup
+              }}
               type="button"
               className="py-2 px-4 flex-center flex-1 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
             >

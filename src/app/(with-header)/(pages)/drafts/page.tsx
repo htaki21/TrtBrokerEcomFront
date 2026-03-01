@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import { usePopup } from "@/app/components/popup/PopupContext";
 import PopupSupprimerledevis from "@/app/components/popup/PopupSupprimerledevis";
 import Wrapper1180 from "@/app/components/wrapper/wrapper-1180";
-import { SVGProps } from "react";
+import { SVGProps, useEffect, useState } from "react";
+import { Draft, getDrafts } from "./draftManager";
 
 export function IconTrash(props: SVGProps<SVGSVGElement>) {
   return (
@@ -75,6 +76,11 @@ export function IconQuestion(props: SVGProps<SVGSVGElement>) {
 
 export default function DraftsPage() {
   const { open } = usePopup();
+  const [drafts, setDrafts] = useState<Draft[]>([]);
+
+  useEffect(() => {
+    setDrafts(getDrafts());
+  }, []);
   return (
     <section className="w-full pt-5 px-4">
       <Wrapper1180 className="pt-[132px] gap-9 max-tablet:gap-5 max-tablet:py-6">
@@ -85,160 +91,121 @@ export default function DraftsPage() {
           </p>
         </div>
         <ul className="grid grid-cols-2 gap-3">
-          <li className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col justify-between gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower">
-            <div className="flex items-start justify-between gap-1">
-              <div className="f-col gap-2">
-                <ul className="flex gap-2 button-s">
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
-                    <span>TRT-45821</span>
-                  </li>
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
-                    <span className="text-Secondary-Red-Medium">En cours</span>
-                  </li>
-                </ul>
-                <div className="flex items-baseline gap-2">
-                  <h5 className="Headings-H5">Assurance Voyage</h5>
-                  <span className="text-Sage-Gray-Higher Button2-XS">
-                    il y a 2 jours
-                  </span>
+          {drafts.map((draft) => {
+            const progress = (draft.currentStep / draft.totalSteps) * 100;
+
+            return (
+              <li
+                key={draft.id}
+                className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col justify-between gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower"
+              >
+                <div className="flex items-start justify-between gap-1">
+                  <div className="f-col gap-2">
+                    <ul className="flex gap-2 button-s">
+                      {/* Reference */}
+                      <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
+                        <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
+                        <span>{draft.reference}</span>
+                      </li>
+
+                      {/* Status */}
+                      {draft.status === "EN_COURS" ? (
+                        <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
+                          <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
+                          <span className="text-Secondary-Red-Medium">
+                            En cours
+                          </span>
+                        </li>
+                      ) : (
+                        <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-Brand-500">
+                          <span className="size-2 rounded-full bg-white shrink-0"></span>
+                          <span className="text-white">Validé</span>
+                        </li>
+                      )}
+                    </ul>
+
+                    <div className="flex items-baseline gap-2">
+                      <h5 className="Headings-H5">{draft.productName}</h5>
+                      <span className="text-Sage-Gray-Higher Button2-XS">
+                        {formatDate(draft.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right icon */}
+                  {draft.status === "EN_COURS" ? (
+                    <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
+                      <IconTrash className="shrink-0" />
+                    </span>
+                  ) : (
+                    <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
+                      <IconDownload className="shrink-0" />
+                    </span>
+                  )}
                 </div>
-              </div>
-              <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                <IconTrash
-                  onClick={() => open("Supprimer le devis")}
-                  className=" shrink-0"
-                />
-              </span>
-            </div>
-            <div className="f-col gap-2">
-              <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
-                <span>Étape 2 sur 3</span>
-                <span>50%</span>
-              </div>
-              <span className="relative">
-                <span className="bg-Neutral-Dark absolute inset-0 rounded-full w-1/2"></span>
-                <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
-              </span>
-            </div>
-          </li>
-          <li className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col gap-2 justify-between cursor-pointer transition hover:bg-Sage-Gray-Lower">
-            <div className="flex items-start justify-between gap-1">
-              <div className="f-col gap-2">
-                <ul className="flex gap-2 button-s">
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
-                    <span>TRT-45821</span>
-                  </li>
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-Brand-500">
-                    <span className="size-2 rounded-full bg-white shrink-0"></span>
-                    <span className="text-white">Validé</span>
-                  </li>
-                </ul>
-                <div className="flex items-baseline gap-2">
-                  <h5 className="Headings-H5">Assurance Voyage</h5>
-                  <span className="text-Sage-Gray-Higher Button2-XS">
-                    il y a 2 jours
-                  </span>
-                </div>
-              </div>
-              <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                <IconDownload className=" shrink-0" />
-              </span>
-            </div>
-            <div className="f-col gap-1 button2-s text-Sage-Gray-Higher">
-              <span>Infos de paiement envoyées par email</span>
-              <span>Validé le 12 août 2025</span>
-            </div>
-          </li>
-          <li className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col justify-between gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower">
-            <div className="flex items-start justify-between gap-1">
-              <div className="f-col gap-2">
-                <ul className="flex gap-2 button-s">
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
-                    <span>TRT-45821</span>
-                  </li>
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
-                    <span className="text-Secondary-Red-Medium">En cours</span>
-                  </li>
-                </ul>
-                <div className="flex items-baseline gap-2">
-                  <h5 className="Headings-H5">Assurance Voyage</h5>
-                  <span className="text-Sage-Gray-Higher Button2-XS">
-                    il y a 2 jours
-                  </span>
-                </div>
-              </div>
-              <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                <IconTrash className=" shrink-0" />
-              </span>
-            </div>
-            <div className="f-col gap-2">
-              <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
-                <span>Étape 2 sur 3</span>
-                <span>50%</span>
-              </div>
-              <span className="relative">
-                <span className="bg-Neutral-Dark absolute inset-0 rounded-full w-1/2"></span>
-                <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
-              </span>
-            </div>
-          </li>
-          <li className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col justify-between gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower">
-            <div className="flex items-start justify-between gap-1">
-              <div className="f-col gap-2">
-                <ul className="flex gap-2 button-s">
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
-                    <span>TRT-45821</span>
-                  </li>
-                  <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                    <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
-                    <span className="text-Secondary-Red-Medium">En cours</span>
-                  </li>
-                </ul>
-                <div className="flex items-baseline gap-2">
-                  <h5 className="Headings-H5">Assurance Voyage</h5>
-                  <span className="text-Sage-Gray-Higher Button2-XS">
-                    il y a 2 jours
-                  </span>
-                </div>
-              </div>
-              <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                <IconTrash className=" shrink-0" />
-              </span>
-            </div>
-            <div className="f-col gap-2">
-              <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
-                <span>Étape 2 sur 3</span>
-                <span>50%</span>
-              </div>
-              <span className="relative">
-                <span className="bg-Neutral-Dark absolute inset-0 rounded-full w-1/2"></span>
-                <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
-              </span>
-            </div>
-          </li>
+
+                {/* Bottom section */}
+                {draft.status === "EN_COURS" ? (
+                  <div className="f-col gap-2">
+                    <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
+                      <span>
+                        Étape {draft.currentStep} sur {draft.totalSteps}
+                      </span>
+                      <span>{Math.round(progress)}%</span>
+                    </div>
+
+                    <span className="relative">
+                      <span
+                        style={{ width: `${progress}%` }}
+                        className="bg-Neutral-Dark absolute inset-0 rounded-full"
+                      ></span>
+                      <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="f-col gap-1 button2-s text-Sage-Gray-Higher">
+                    <span>Infos de paiement envoyées par email</span>
+                    <span>Validé le {formatFullDate(draft.updatedAt)}</span>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
-        {/* empty state */}
-        <div className="py-15 flex-center flex-col gap-4 text-center">
-          <span className="flex-center p-3 rounded-[12px] bg-Sage-Gray-Lower">
-            <IconQuestion className=" shrink-0" />
-          </span>
-          <div className="f-col gap-2">
-            <h6 className="Headings-H6">
-              Vous n’avez aucun devis pour le moment
-            </h6>
-            <p className="Button2-M text-Sage-Gray-Higher">
-              Commencez un devis en quelques étapes, sans engagement.
-            </p>
+        {drafts.length === 0 && (
+          <div className="py-15 flex-center flex-col gap-4 text-center">
+            <span className="flex-center p-3 rounded-[12px] bg-Sage-Gray-Lower">
+              <IconQuestion className=" shrink-0" />
+            </span>
+            <div className="f-col gap-2">
+              <h6 className="Headings-H6">
+                Vous n’avez aucun devis pour le moment
+              </h6>
+              <p className="Button2-M text-Sage-Gray-Higher">
+                Commencez un devis en quelques étapes, sans engagement.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </Wrapper1180>
       <PopupSupprimerledevis />
     </section>
   );
 }
+
+
+const formatDate = (date: string) => {
+  const diff = (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24);
+
+  if (diff < 1) return "Aujourd'hui";
+  if (diff < 2) return "Hier";
+  return `il y a ${Math.floor(diff)} jours`;
+};
+
+const formatFullDate = (date: string) => {
+  return new Date(date).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
