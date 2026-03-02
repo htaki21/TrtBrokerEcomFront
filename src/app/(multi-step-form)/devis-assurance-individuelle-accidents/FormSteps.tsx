@@ -8,6 +8,7 @@ import step1Data from "./step1/stepInfo";
 import Step2 from "./step2/step2";
 import step2Data from "./step2/stepInfo";
 import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
+import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -36,8 +37,26 @@ export default function FormSteps() {
 
   // const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
 
-  const { data } = useFormContext();
-  const { registerDraftData } = useDraft();
+  const { data, setData } = useFormContext(); // your form state hook
+  const { drafts, loadDraft, registerDraftData, setDraftId } =
+    useDraft();
+
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get("draftId");
+
+  // 1️⃣ Restore draft if URL contains draftId
+  useEffect(() => {
+    if (draftId && drafts.length) {
+      const draft = drafts.find((d) => d.id === draftId);
+      if (draft) {
+        setDraftId(draft.id); // restore draftId in context
+        loadDraft(draft); // restore registeredData
+        setCurrentStepIndex(draft.currentStep - 1); // -1 because index starts at 0
+        setData(draft.formData); // restore form inputs
+      }
+    }
+  }, [draftId, drafts]);
+
   // 🔥 REGISTER DRAFT DATA HERE
   useEffect(() => {
     registerDraftData({
@@ -48,7 +67,7 @@ export default function FormSteps() {
       totalSteps: stepsCount,
       title: "",
     });
-  }, []); // only once on mount
+  }, [data, currentStepIndex]);
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">

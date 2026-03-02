@@ -5,6 +5,7 @@ import { usePopup } from "./PopupContext";
 import { SVGProps } from "react";
 import { IconX } from "./PopupSupprimerledevis";
 import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
+import Link from "next/link";
 
 export function IconAlert(props: SVGProps<SVGSVGElement>) {
   return (
@@ -91,12 +92,13 @@ export default function PopupEnregistrer() {
             >
               Enregistrer et quitter
             </button>
-            <button
-              type="button"
+            <Link
+              href="/drafts"
+              onClick={close}
               className="py-2 px-4 flex-center flex-1 rounded-full bg-Secondary-Red-Medium hover:bg-Secondary-Red-Higher transition cursor-pointer text-white"
             >
               Quitter sans enregistrer
-            </button>
+            </Link>
           </div>
           <p className="Text-S text-Sage-Gray-Higher">
             Vous pourrez le retrouver à tout moment dans Mes devis.

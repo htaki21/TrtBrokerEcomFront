@@ -5,6 +5,7 @@ import PopupSupprimerledevis from "@/app/components/popup/PopupSupprimerledevis"
 import Wrapper1180 from "@/app/components/wrapper/wrapper-1180";
 import { SVGProps } from "react";
 import { useDraft } from "./DraftContext";
+import { useRouter } from "next/navigation";
 
 export function IconTrash(props: SVGProps<SVGSVGElement>) {
   return (
@@ -75,7 +76,8 @@ export function IconQuestion(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function DraftsPage() {
-  const { drafts } = useDraft(); // use global reactive drafts
+  const router = useRouter();
+  const { drafts, loadDraft } = useDraft(); // use global reactive drafts
   const { open } = usePopup();
 
   return (
@@ -94,6 +96,12 @@ export default function DraftsPage() {
             return (
               <li
                 key={draft.id}
+                onClick={() => {
+                  if (draft.status === "EN_COURS") {
+                    loadDraft(draft); // restore draft in context
+                    router.push(`/${draft.product}?draftId=${draft.id}`);
+                  }
+                }}
                 className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower"
               >
                 <div className="flex items-start justify-between gap-1">
@@ -132,9 +140,10 @@ export default function DraftsPage() {
                   {/* Right icon */}
                   {draft.status === "EN_COURS" ? (
                     <span
-                      onClick={() =>
-                        open("Supprimer le devis", { draftId: draft.id })
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation(); // ✅ prevent parent li click
+                        open("Supprimer le devis", { draftId: draft.id });
+                      }}
                       className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer"
                     >
                       <IconTrash className="shrink-0" />

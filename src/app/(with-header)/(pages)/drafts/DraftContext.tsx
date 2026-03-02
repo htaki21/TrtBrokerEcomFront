@@ -20,6 +20,10 @@ type RegisteredDraftData = {
 
 type DraftContextType = {
   drafts: Draft[];
+  draftId: string | null;
+  registeredData: RegisteredDraftData | null;
+  setDraftId: (id: string | null) => void;
+  loadDraft: (draft: Draft) => void; // restore draft
   registerDraftData: (data: RegisteredDraftData) => void;
   saveAndExit: () => void;
   completeDraft: () => void;
@@ -35,27 +39,32 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
     useState<RegisteredDraftData | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
 
-  // Load drafts from localStorage on mount
-  useEffect(() => {
-    setDrafts(getDrafts());
-  }, []);
-
+  useEffect(() => setDrafts(getDrafts()), []);
   useEffect(() => {
     const handleStorage = () => setDrafts(getDrafts());
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  const loadDraft = (draft: Draft) => {
+    setDraftId(draft.id);
+    setRegisteredData({
+      product: draft.product,
+      productName: draft.productName,
+      formData: draft.formData,
+      currentStep: draft.currentStep,
+      totalSteps: draft.totalSteps,
+      title: draft.title,
+    });
+  };
+
   const registerDraftData = (data: RegisteredDraftData) => {
     setRegisteredData(data);
   };
 
-  const refreshDrafts = () => setDrafts(getDrafts());
-
   const saveAndExit = () => {
     if (!registeredData) return;
     const id = draftId ?? crypto.randomUUID();
-
     const draft: Draft = {
       id,
       reference: "TRT-" + Math.floor(Math.random() * 99999),
@@ -63,31 +72,27 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
       updatedAt: new Date().toISOString(),
       ...registeredData,
     };
-
-    saveOrUpdateDraft(draft); // write to localStorage
-    setDraftId(null); // reset so next draft is new
-    setRegisteredData(null); // clear current form data
-    refreshDrafts(); // updates context state immediately
+    saveOrUpdateDraft(draft);
+    setDraftId(null);
+    setRegisteredData(null);
+    setDrafts(getDrafts());
     router.push("/drafts");
   };
 
   const completeDraft = () => {
     if (!registeredData) return;
-
     const id = draftId ?? crypto.randomUUID();
-
     const draft: Draft = {
       id,
       reference: "TRT-" + Math.floor(Math.random() * 99999),
-      status: "VALIDE", // mark as validated directly
+      status: "VALIDE",
       updatedAt: new Date().toISOString(),
       ...registeredData,
     };
-
     saveOrUpdateDraft(draft);
-    setDraftId(null); // reset for next draft
+    setDraftId(null);
     setRegisteredData(null);
-    refreshDrafts(); // reactive update
+    setDrafts(getDrafts());
   };
 
   const deleteDraft = (id: string) => {
@@ -100,6 +105,10 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
     <DraftContext.Provider
       value={{
         drafts,
+        draftId,
+        registeredData,
+        setDraftId,
+        loadDraft,
         registerDraftData,
         saveAndExit,
         completeDraft,
