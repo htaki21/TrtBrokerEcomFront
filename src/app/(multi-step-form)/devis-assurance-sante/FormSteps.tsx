@@ -10,9 +10,10 @@ import step2Data from "./step2/stepInfo";
 import Step3 from "./step3/step3";
 import step3Data from "./step3/stepInfo";
 import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
+import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
-  const { data } = useFormContext(); // ✅ safe, inside provider
+  const { data, setData } = useFormContext(); // ✅ safe, inside provider
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const stepDataList = [step1Data, step2Data, step3Data];
@@ -41,7 +42,22 @@ export default function FormSteps() {
     }
   };
 
-  const { registerDraftData } = useDraft();
+  const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get("draftId");
+
+  // 1️⃣ Restore draft if URL contains draftId
+  useEffect(() => {
+    if (draftId && drafts.length) {
+      const draft = drafts.find((d) => d.id === draftId);
+      if (draft) {
+        setDraftId(draft.id); // restore draftId in context
+        loadDraft(draft); // restore registeredData
+        setCurrentStepIndex(draft.currentStep - 1); // -1 because index starts at 0
+        setData(draft.formData); // restore form inputs
+      }
+    }
+  }, [draftId, drafts]);
   // 🔥 REGISTER DRAFT DATA HERE
   useEffect(() => {
     const timeout = setTimeout(() => {

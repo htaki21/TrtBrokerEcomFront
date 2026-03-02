@@ -18,6 +18,7 @@ import step2Data from "./step2/stepInfo";
 import Step3 from "./step3/step3";
 import step3Data from "./step3/stepInfo";
 import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
+import { useSearchParams } from "next/navigation";
 
 // Submit button component for final steps
 function FinalStepSubmitButton({
@@ -275,7 +276,23 @@ export default function FormSteps() {
     }
   };
 
-  const { registerDraftData } = useDraft();
+  const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
+  const searchParams = useSearchParams();
+  const draftId = searchParams.get("draftId");
+
+  // 1️⃣ Restore draft if URL contains draftId
+useEffect(() => {
+  if (draftId && drafts.length) {
+    const draft = drafts.find((d) => d.id === draftId);
+    if (draft) {
+      setDraftId(draft.id);
+      loadDraft(draft); // restores registeredData
+      if (draft.currentStepId) setCurrentStepId(draft.currentStepId); // navigate to correct step
+      if (draft.history) setHistory(draft.history); // restore history
+      setData(draft.formData); // restore form inputs
+    }
+  }
+}, [draftId, drafts]);
 
   useEffect(() => {
     registerDraftData({
@@ -285,8 +302,10 @@ export default function FormSteps() {
       currentStep: branchStepsVisited.length,
       totalSteps: totalBranchSteps,
       title: isBranchStep ? (currentStep?.title ?? "") : "",
+      currentStepId,
+      history,
     });
-  }, [currentStepId, history.length]);
+  }, [currentStepId, history.length, data]); 
 
   return (
     <div className="flex w-full flex-col max-tablet:min-h-svh max-tablet:pb-[200px] items-center bg-white px-4">

@@ -22,6 +22,8 @@ export interface Draft {
   updatedAt: string;
   formData: any;
   title: string;
+  currentStepId?: string;
+  history?: string[];
 }
 
 const KEY = "drafts";

@@ -16,6 +16,8 @@ type RegisteredDraftData = {
   currentStep: number;
   totalSteps: number;
   title: string;
+  currentStepId?: string;
+  history?: string[];
 };
 
 type DraftContextType = {
@@ -55,6 +57,8 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
       currentStep: draft.currentStep,
       totalSteps: draft.totalSteps,
       title: draft.title,
+      currentStepId: draft.currentStepId,
+      history: draft.history,
     });
   };
 
