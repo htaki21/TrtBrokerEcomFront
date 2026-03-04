@@ -6,10 +6,16 @@ import { usePopup } from "../components/popup/PopupContext";
 
 export default function FormHeader() {
   const { open } = usePopup();
+    const handleNavigation = (e: React.MouseEvent, href: string) => {
+      e.preventDefault(); // stop navigation
+      open("Enregistrer", { redirectTo: href });
+    };
+
   return (
     <header className="w-full max-w-[1180px] max-laptop:px-4 m-auto flex items-center justify-between gap-2 max-mobile:justify-end max-tablet:py-3 pt-[24px] pb-[12px]">
       <Link
         href="/contact"
+        onClick={(e) => handleNavigation(e, "/contact")}
         className="bg-Primary-500 flex w-fit max-mobile:order-2 rounded-full p-[12px] hover:bg-Primary-600 transition-colors cursor-pointer"
         title="Contactez-nous"
       >
@@ -42,7 +48,12 @@ export default function FormHeader() {
         </svg>
       </Link>
       <div className="max-mobile:order-1 max-mobile:flex-1">
-        <Logosvg href="/" className="max-mobile:w-[111px]" variant="green" />
+        <Logosvg
+          href="/"
+          onClick={(e: any) => handleNavigation(e, "/")}
+          className="max-mobile:w-[111px]"
+          variant="green"
+        />
       </div>
       <button
         type="button"

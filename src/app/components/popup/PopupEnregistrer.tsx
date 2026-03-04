@@ -6,6 +6,7 @@ import { SVGProps } from "react";
 import { IconX } from "./PopupSupprimerledevis";
 import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function IconAlert(props: SVGProps<SVGSVGElement>) {
   return (
@@ -28,8 +29,9 @@ export function IconAlert(props: SVGProps<SVGSVGElement>) {
 }
 
 export default function PopupEnregistrer() {
+  const router = useRouter();
   const { saveAndExit } = useDraft();
-  const { activePopup, close } = usePopup();
+  const { activePopup, payload, close } = usePopup();
   const isOpen = activePopup === "Enregistrer";
 
   // Close on ESC
@@ -48,6 +50,14 @@ export default function PopupEnregistrer() {
   }, [isOpen, close]);
 
   if (!isOpen) return null;
+
+    const redirectTo = payload?.redirectTo;
+
+    const handleRedirect = () => {
+      if (redirectTo) {
+        router.push(redirectTo);
+      }
+    };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -85,7 +95,8 @@ export default function PopupEnregistrer() {
             <button
               onClick={() => {
                 saveAndExit();
-                close(); // close popup
+                close();
+                handleRedirect();
               }}
               type="button"
               className="py-2 px-4 flex-center flex-1 rounded-full bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium transition cursor-pointer"
