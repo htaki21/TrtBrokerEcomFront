@@ -133,7 +133,7 @@ export const SECURITY_CONFIG = {
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     "Permissions-Policy":
       "camera=(), microphone=(), geolocation=(), interest-cohort=()",
@@ -232,7 +232,7 @@ export const SECURITY_CONFIG = {
     REQUIRE_API_KEY: false, // Set to true for additional protection
     CORS_ORIGINS:
       process.env.NODE_ENV === "production"
-        ? ["https://trtbroker.com"]
+        ? ["https://trtbroker.com", "https://trtecomv2.deadlinemaroc.com"]
         : ["http://localhost:3000"],
     MAX_REQUESTS_PER_MINUTE: 60,
     MAX_REQUESTS_PER_HOUR: 1000,
@@ -242,7 +242,7 @@ export const SECURITY_CONFIG = {
   CSP: {
     DIRECTIVES: {
       "default-src": ["'self'"],
-      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://static.cloudflareinsights.com"],
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "https:"],
       "font-src": ["'self'", "data:"],

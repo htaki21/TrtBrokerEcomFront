@@ -125,7 +125,7 @@ export function proxy(request: NextRequest) {
     if (pathname.startsWith("/api/")) {
       const allowedOrigin =
         process.env.NODE_ENV === "production"
-          ? "https://trtbroker.com"
+          ? (request.headers.get("origin") || "https://trtecomv2.deadlinemaroc.com")
           : "http://localhost:3000";
 
       response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
@@ -144,7 +144,7 @@ export function proxy(request: NextRequest) {
     if (request.method === "OPTIONS") {
       const allowedOrigin =
         process.env.NODE_ENV === "production"
-          ? "https://trtbroker.com"
+          ? (request.headers.get("origin") || "https://trtecomv2.deadlinemaroc.com")
           : "http://localhost:3000";
 
       return new NextResponse(null, {
