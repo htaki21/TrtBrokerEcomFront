@@ -55,13 +55,14 @@ export interface CategoryResponse {
 }
 
 const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+const SELF_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 // Get all categories
 export const getCategories = async (): Promise<BlogCategory[]> => {
   try {
-    // Use localhost for server-side, relative for client-side
-    const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+    // Use server URL for server-side, relative for client-side
+    const baseUrl = typeof window === "undefined" ? SELF_URL : "";
     const endpoint = `${baseUrl}/api/blog-categories`;
 
     const response = await fetch(endpoint, {
@@ -131,7 +132,7 @@ export const getBlogs = async (
 
     // Use localhost for server-side, relative for client-side
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+      typeof window === "undefined" ? SELF_URL : "";
     let url = `${baseUrl}/api/blogs?page=${page}&pageSize=${actualPageSize}`;
 
     // Add category filter if provided
@@ -300,7 +301,7 @@ export const getBlogBySlug = async (slug: string): Promise<BlogPost | null> => {
   try {
     // Use localhost for server-side, relative for client-side
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+      typeof window === "undefined" ? SELF_URL : "";
     const endpoint = `${baseUrl}/api/blogs/${encodeURIComponent(slug)}`;
     // console.log(`📡 Fetching blog by slug: ${endpoint}`);
 
@@ -392,7 +393,7 @@ export const getFeaturedBlogs = async (
   try {
     // Use localhost for server-side, relative for client-side
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+      typeof window === "undefined" ? SELF_URL : "";
     const endpoint = `${baseUrl}/api/blogs?pageSize=${limit}&sort=createdAt:desc`;
     // console.log(`📡 Fetching featured blogs: ${endpoint}`);
 
@@ -465,7 +466,7 @@ export const getPopularBlogs = async (
   try {
     // Use localhost for server-side, relative for client-side
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+      typeof window === "undefined" ? SELF_URL : "";
     const endpoint = `${baseUrl}/api/blogs?pageSize=${limit}&sort=createdAt:desc`;
     // console.log(`📡 Fetching popular blogs: ${endpoint}`);
 
@@ -553,7 +554,7 @@ export const getAllBlogs = async (
     while (hasMore) {
       // Use localhost for server-side, relative for client-side
       const baseUrl =
-        typeof window === "undefined" ? "http://localhost:3000" : "";
+        typeof window === "undefined" ? SELF_URL : "";
       let url = `${baseUrl}/api/blogs?page=${page}&pageSize=${pageSize}&sort=${sort}`;
 
       // Add efficient search filter - only title, slug, and category
@@ -759,7 +760,7 @@ export const searchBlogs = async (
 
     // Use localhost for server-side, relative for client-side
     const baseUrl =
-      typeof window === "undefined" ? "http://localhost:3000" : "";
+      typeof window === "undefined" ? SELF_URL : "";
     const url = `${baseUrl}/api/blogs?search=${encodeURIComponent(sanitizedSearch)}&sort=createdAt:desc`;
 
     // Note: Category filtering will be handled client-side

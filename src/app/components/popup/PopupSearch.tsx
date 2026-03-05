@@ -235,12 +235,74 @@ export function Iconblockquoteline(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+interface BlogResult {
+  id: number;
+  titre: string;
+  slug: string;
+  description: string;
+  categorie?: { nom: string; slug: string };
+  createdAt: string;
+  image?: { url: string; alternativeText?: string };
+}
+
 export default function PopupSearch() {
   const { activePopup, close } = usePopup();
   const isOpen = activePopup === "Search";
   const [value, setValue] = useState("");
+  const [blogs, setBlogs] = useState<BlogResult[]>([]);
+  const [loadingBlogs, setLoadingBlogs] = useState(false);
+  const [initialBlogs, setInitialBlogs] = useState<BlogResult[]>([]);
+
+  const query = value.trim().toLowerCase();
 
   const clear = () => setValue("");
+
+  // Fetch latest blogs when popup opens
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch("/api/blogs?page=1&pageSize=5&sort=createdAt:desc")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.data) setInitialBlogs(data.data);
+      })
+      .catch(() => {});
+  }, [isOpen]);
+
+  // Search blogs with debounce
+  useEffect(() => {
+    if (!query) {
+      setBlogs([]);
+      return;
+    }
+
+    setLoadingBlogs(true);
+    const timeout = setTimeout(() => {
+      fetch(`/api/blogs?page=1&pageSize=5&sort=createdAt:desc&search=${encodeURIComponent(query)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.data) setBlogs(data.data);
+          else setBlogs([]);
+        })
+        .catch(() => setBlogs([]))
+        .finally(() => setLoadingBlogs(false));
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  // Filter insurance items based on query
+  const filteredInsurance = query
+    ? searchItems.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query) ||
+          item.description.toLowerCase().includes(query) ||
+          item.keywords.some((k) => k.includes(query)),
+      )
+    : searchItems;
+
+  const displayedBlogs = query ? blogs : initialBlogs;
+
+  const hasResults = filteredInsurance.length > 0 || displayedBlogs.length > 0;
 
   // Close on ESC
   useEffect(() => {
@@ -259,10 +321,22 @@ export default function PopupSearch() {
 
   // Reset search when popup closes
   useEffect(() => {
-    if (!isOpen) setValue("");
+    if (!isOpen) {
+      setValue("");
+      setBlogs([]);
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -296,182 +370,213 @@ export default function PopupSearch() {
             )}
           </label>
         </div>
-        <div className="py-4 px-6 f-col gap-3 border-b border-Sage-Gray-Lower button-s">
-          {/* Résultats */}
-          {/* <span>Résultats pour “assurance voyage”</span> */}
-          <span>Suggestions rapides</span>
-          <ul className="flex flex-wrap gap-2">
-            <Link
-              href="/"
-              onClick={close}
-              className="py-2 px-4 flex items-center gap-1 bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium cursor-pointer transition rounded-full"
-            >
-              <IconArrowLeft className=" shrink-0" />
-              <span>“Assurance voyage”</span>
-            </Link>
-            <Link
-              href="/"
-              onClick={close}
-              className="py-2 px-4 flex items-center gap-1 bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium cursor-pointer transition rounded-full"
-            >
-              <IconArrowLeft className=" shrink-0" />
-              <span>“Voyage Schengen”</span>
-            </Link>
-            <Link
-              href="/"
-              onClick={close}
-              className="py-2 px-4 flex items-center gap-1 bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium cursor-pointer transition rounded-full"
-            >
-              <IconArrowLeft className=" shrink-0" />
-              <span>“Assurance visa ?”</span>
-            </Link>
-          </ul>
-        </div>
-        <div className="py-4 px-6 f-col gap-3 border-b border-Sage-Gray-Lower">
-          <span className="button-s">Nos assurances</span>
-          {/* Résultats */}
-          {/* <span className="button-s">Nos assurances (2)</span> */}
-          <div className="grid grid-cols-2 gap-2">
-            {searchItems.map((item, index) => {
-              const Icon = item.icon;
 
-              return (
-                <Link
-                  href="/"
-                  onClick={close}
-                  key={index}
-                  className="p-1 flex gap-3 rounded-[12px] hover:bg-Sage-Gray-Lower transition cursor-pointer group/assurance"
+        {/* Quick suggestions - only when no query */}
+        {!query && (
+          <div className="py-4 px-6 f-col gap-3 border-b border-Sage-Gray-Lower button-s">
+            <span>Suggestions rapides</span>
+            <ul className="flex flex-wrap gap-2">
+              {quickSuggestions.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setValue(s)}
+                  className="py-2 px-4 flex items-center gap-1 bg-Sage-Gray-Lower hover:bg-Sage-Gray-Medium cursor-pointer transition rounded-full"
                 >
-                  <span className="size-[56px] flex-center bg-Brand-500 rounded-[8px]">
-                    <Icon className="shrink-0" />
-                  </span>
-                  <div className="flex flex-col justify-center gap-1 flex-1">
-                    <div className="flex items-center gap-1 transition group-hover/assurance:text-Brand-800">
-                      <span className="Button-M">{item.title}</span>
-                      <IconArrowLeft className="shrink-0 transition opacity-0 group-hover/assurance:opacity-100" />
+                  <IconArrowLeft className=" shrink-0" />
+                  <span>&quot;{s}&quot;</span>
+                </button>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Results header when searching */}
+        {query && (
+          <div className="py-3 px-6 border-b border-Sage-Gray-Lower button-s text-Sage-Gray-Higher">
+            {loadingBlogs
+              ? "Recherche en cours..."
+              : hasResults
+                ? `Résultats pour "${value}"`
+                : null}
+          </div>
+        )}
+
+        {/* Insurance items */}
+        {filteredInsurance.length > 0 && (
+          <div className="py-4 px-6 f-col gap-3 border-b border-Sage-Gray-Lower">
+            <span className="button-s">
+              Nos assurances{query ? ` (${filteredInsurance.length})` : ""}
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {filteredInsurance.map((item, index) => {
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    href={item.href}
+                    onClick={close}
+                    key={index}
+                    className="p-1 flex gap-3 rounded-[12px] hover:bg-Sage-Gray-Lower transition cursor-pointer group/assurance"
+                  >
+                    <span className="size-[56px] flex-center bg-Brand-500 rounded-[8px]">
+                      <Icon className="shrink-0" />
+                    </span>
+                    <div className="flex flex-col justify-center gap-1 flex-1">
+                      <div className="flex items-center gap-1 transition group-hover/assurance:text-Brand-800">
+                        <span className="Button-M">{item.title}</span>
+                        <IconArrowLeft className="shrink-0 transition opacity-0 group-hover/assurance:opacity-100" />
+                      </div>
+                      <p className="Text-S text-Text-Body transition group-hover/assurance:text-Brand-800 line-clamp-1">
+                        {item.description}
+                      </p>
                     </div>
-                    <p className="Text-S text-Text-Body transition group-hover/assurance:text-Brand-800 line-clamp-1">
-                      {item.description}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Blog articles */}
+        {displayedBlogs.length > 0 && (
+          <div className="py-4 px-6 f-col gap-4 border-b border-Sage-Gray-Lower">
+            <div className="flex justify-between">
+              <span className="button-s">
+                {query ? `Articles (${displayedBlogs.length})` : "Derniers articles"}
+              </span>
+              <Link
+                href={query ? `/actualites-conseils?search=${encodeURIComponent(value)}` : "/actualites-conseils"}
+                onClick={close}
+                className="button2-s text-Sage-Gray-Higher hover:text-Sage-Gray-Medium"
+              >
+                Voir tous les articles
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {displayedBlogs.map((blog) => (
+                <Link
+                  href={`/actualites-conseils/${blog.slug}`}
+                  onClick={close}
+                  key={blog.id}
+                  className="p-1 flex gap-3 rounded-[12px] hover:bg-Sage-Gray-Lowest transition cursor-pointer group/blog"
+                >
+                  {blog.image?.url ? (
+                    <img
+                      src={
+                        blog.image.url.startsWith("/")
+                          ? `/api/media${blog.image.url}`
+                          : blog.image.url
+                      }
+                      alt={blog.image.alternativeText || blog.titre}
+                      className="size-[76px] object-cover bg-Sage-Gray-Lower rounded-[8px]"
+                    />
+                  ) : (
+                    <span className="size-[76px] flex-center bg-Sage-Gray-Lower transition group-hover/blog:bg-Sage-Gray-Low rounded-[8px]">
+                      <Iconblockquoteline className="shrink-0" />
+                    </span>
+                  )}
+
+                  <div className="flex flex-col justify-center gap-1 flex-1">
+                    {blog.categorie?.nom && (
+                      <div className="flex items-center gap-1">
+                        <span className="size-1.5 shrink-0 rounded-full bg-Neutral-Dark"></span>
+                        <span className="button2-s">{blog.categorie.nom}</span>
+                      </div>
+                    )}
+                    <span className="Button-M line-clamp-1">{blog.titre}</span>
+                    <p className="Button2-XS text-Text-Body">
+                      {formatDate(blog.createdAt)}
                     </p>
                   </div>
                 </Link>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="py-4 px-6 f-col gap-4 border-b border-Sage-Gray-Lower">
-          <div className="flex justify-between">
-            <span className="button-s">Derniers articles</span>
-            {/* Résultats */}
-            {/* <span className="button-s">Articles (2)</span> */}
-            <Link
-              href="/actualites-conseils"
-              onClick={close}
-              className="button2-s text-Sage-Gray-Higher hover:text-Sage-Gray-Medium"
-            >
-              Voir tous les articles
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-2">
-            <Link
-              href="/"
-              onClick={close}
-              className="p-1 flex gap-3 rounded-[12px] hover:bg-Sage-Gray-Lowest transition cursor-pointer group/blog"
-            >
-              <span className="size-[76px] flex-center bg-Sage-Gray-Lower transition group-hover/blog:bg-Sage-Gray-Low rounded-[8px]">
-                <Iconblockquoteline className="shrink-0" />
-              </span>
+        )}
 
-              <div className="flex flex-col justify-center gap-1 flex-1">
-                <div className="flex items-center gap-1">
-                  <span className="size-1.5 shrink-0 rounded-full bg-Neutral-Dark"></span>
-                  <span className="button2-s">Épargne & Préparation</span>
-                </div>
-                <span className="Button-M">
-                  Pourquoi souscrire une assurance vie dès aujourd’hui ?
-                </span>
-                <p className="Button2-XS text-Text-Body">04 Juillet 2025</p>
-              </div>
-            </Link>
-            <Link
-              href="/"
-              onClick={close}
-              className="p-1 flex gap-3 rounded-[12px] hover:bg-Sage-Gray-Lowest transition cursor-pointer group/blog"
-            >
-              <span className="size-[76px] flex-center bg-Sage-Gray-Lower transition group-hover/blog:bg-Sage-Gray-Low rounded-[8px]">
-                <Iconblockquoteline className="shrink-0" />
-              </span>
-
-              <div className="flex flex-col justify-center gap-1 flex-1">
-                <div className="flex items-center gap-1">
-                  <span className="size-1.5 shrink-0 rounded-full bg-Neutral-Dark"></span>
-                  <span className="button2-s">Épargne & Préparation</span>
-                </div>
-                <span className="Button-M">
-                  Pourquoi souscrire une assurance vie dès aujourd’hui ?
-                </span>
-                <p className="Button2-XS text-Text-Body">04 Juillet 2025</p>
-              </div>
-            </Link>
+        {/* No results */}
+        {query && !loadingBlogs && !hasResults && (
+          <div className="flex-center flex-col gap-4 text-center flex-1">
+            <span className="flex-center p-3 rounded-[12px] bg-Sage-Gray-Lower">
+              <IconQuestion className=" shrink-0" />
+            </span>
+            <div className="f-col gap-2">
+              <h6 className="Headings-H6">Aucun résultat trouvé</h6>
+              <p className="Button2-M text-Sage-Gray-Higher">
+                Essayez avec d&apos;autres mots-clés ou découvrez nos assurances.
+              </p>
+            </div>
           </div>
-        </div>
-        {/* Aucun résultat */}
-        {/* <div className="flex-center flex-col gap-4 text-center flex-1">
-          <span className="flex-center p-3 rounded-[12px] bg-Sage-Gray-Lower">
-            <IconQuestion className=" shrink-0" />
-          </span>
-          <div className="f-col gap-2">
-            <h6 className="Headings-H6">Aucun résultat trouvé</h6>
-            <p className="Button2-M text-Sage-Gray-Higher">
-              Essayez avec d’autres mots-clés ou découvrez nos assurances.
-            </p>
-          </div>
-        </div> */}
+        )}
       </div>
     </div>
   );
 }
 
+const quickSuggestions = [
+  "Assurance voyage",
+  "Assurance auto",
+  "Santé",
+  "Habitation",
+  "Moto",
+];
+
 const searchItems = [
   {
     title: "Assurance Auto",
-    description:
-      "Découvrez les avantages d’une épargne à long terme pour sécuriser vos projets",
+    description: "Protection complète pour votre véhicule",
     icon: Icon1,
+    href: "/assurance-automobile",
+    keywords: ["auto", "voiture", "véhicule", "automobile", "carte verte"],
   },
   {
     title: "Habitation",
     description: "Protection de votre logement",
     icon: Icon2,
+    href: "/assurance-habitation",
+    keywords: ["habitation", "maison", "logement", "appartement", "domicile"],
   },
   {
     title: "Plaisance / Jet-ski",
     description: "Assurance bateau & jet-ski",
     icon: Icon3,
+    href: "/assurance-plaisance-jet-ski",
+    keywords: ["plaisance", "jet-ski", "bateau", "jetski", "nautique", "mer"],
   },
   {
     title: "Individuelle Accidents",
-    description: "Indemnisation en cas d’accident",
+    description: "Indemnisation en cas d'accident",
     icon: Icon4,
+    href: "/assurance-individuelle-accidents",
+    keywords: ["accident", "individuelle", "corporel", "blessure"],
   },
   {
     title: "Assurance Moto",
     description: "Couverture dédiée pour votre moto",
     icon: Icon5,
+    href: "/assurance-moto",
+    keywords: ["moto", "motocycle", "deux roues", "scooter"],
   },
   {
     title: "Santé",
     description: "Couverture médicale adaptée",
     icon: Icon6,
+    href: "/assurance-sante",
+    keywords: ["santé", "sante", "médical", "maladie", "soins"],
   },
   {
     title: "Assurance maladie complémentaire",
     description: "Réduction des frais médicaux",
     icon: Icon7,
+    href: "/assurance-maladie-complementaire",
+    keywords: ["maladie", "complémentaire", "mutuelle", "frais médicaux"],
   },
   {
     title: "Assistance Voyage",
-    description: "Assistance 24/7 à l’international",
+    description: "Assistance 24/7 à l'international",
     icon: Icon8,
+    href: "/assurance-voyage",
+    keywords: ["voyage", "schengen", "visa", "international", "étranger", "expatrié"],
   },
 ];
