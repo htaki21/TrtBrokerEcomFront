@@ -24,6 +24,7 @@ export type FormData = {
   creneauHoraire: string;
   marketingConsent: boolean;
   termsAccepted: boolean;
+  modePaiement: "Paiement en agence" | "Virement bancaire" | "";
 };
 
 type FieldErrors = Record<string, string>;
@@ -38,7 +39,7 @@ type FormContextType = {
   clearFieldError: (field: string) => void;
   submitForm: (
     currentStepId?: string
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string; reference?: string }>;
   isSubmitting: boolean;
   submissionResult: { success: boolean; error?: string } | null;
 };
@@ -61,6 +62,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     creneauHoraire: "",
     marketingConsent: false,
     termsAccepted: false,
+    modePaiement: "Paiement en agence",
   });
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -162,6 +164,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
   ): Promise<{
     success: boolean;
     error?: string;
+    reference?: string;
   }> => {
     if (!isFormValid(currentStepId)) {
       return {
@@ -185,6 +188,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
             ? result.message
             : "Opération terminée",
         error: typeof result.error === "string" ? result.error : undefined,
+        reference: result.reference,
       };
 
       setSubmissionResult(safeResult);

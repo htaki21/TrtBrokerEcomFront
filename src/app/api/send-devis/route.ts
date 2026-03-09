@@ -41,6 +41,10 @@ async function handleDevisSubmission(request: NextRequest) {
     // Check if email is provided and valid (optional now)
     const hasValidEmail = clientEmail && clientEmail.includes("@");
 
+    // Generate a unique reference number for this request
+    const now = new Date();
+    const devisReference = `TRT-${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}${String(Date.now()).slice(-5)}`;
+
     // Log successful API request
     logSecurityEvent("API_REQUEST_SUCCESS", {
       endpoint: "/api/send-devis",
@@ -104,6 +108,37 @@ async function handleDevisSubmission(request: NextRequest) {
     } catch (logoError) {
       // Logo not found, using text logo
     }
+
+    // Map API enum values to human-readable French labels
+    const enumLabels: Record<string, Record<string, string>> = {
+      typeAssistance: {
+        schengen: "Schengen",
+        monde: "Monde",
+        etudiant: "Étudiant",
+        expatrie: "Expatrié",
+      },
+      dureeVisa: {
+        six_mois: "6 mois",
+        plus_six_mois: "Plus de 6 mois",
+      },
+      dureeSchengen: {
+        six_mois: "6 mois",
+        plus_six_mois: "Plus de 6 mois",
+      },
+      dureeMonde: {
+        six_mois: "6 mois",
+        un_an: "1 an",
+      },
+      typeCouverture: {
+        individuel: "Individuel",
+        couple: "Couple",
+        famille: "Famille",
+      },
+      modePaiement: {
+        paiement_en_agence: "Paiement en agence",
+        virement_bancaire: "Virement bancaire",
+      },
+    };
 
     // Professional email with basic anti-spam headers
     const mailOptions = {
@@ -353,27 +388,28 @@ async function handleDevisSubmission(request: NextRequest) {
                 `
                         : formType === "assistance-voyage"
                           ? `
+                  <li><strong>Référence :</strong> ${devisReference}</li>
                   <li><strong>Type d'assistance :</strong> ${
-                    formData.typeAssistance || "Non spécifié"
+                    enumLabels.typeAssistance[formData.typeAssistance] || formData.typeAssistance || "Non spécifié"
                   }</li>
                   ${
                     formData.dureeVisa
-                      ? `<li><strong>Durée du visa :</strong> ${formData.dureeVisa}</li>`
+                      ? `<li><strong>Durée du visa :</strong> ${enumLabels.dureeVisa[formData.dureeVisa] || formData.dureeVisa}</li>`
                       : ""
                   }
                   ${
                     formData.dureeSchengen
-                      ? `<li><strong>Durée Schengen :</strong> ${formData.dureeSchengen}</li>`
+                      ? `<li><strong>Durée Schengen :</strong> ${enumLabels.dureeSchengen[formData.dureeSchengen] || formData.dureeSchengen}</li>`
                       : ""
                   }
                   ${
                     formData.dureeMonde
-                      ? `<li><strong>Durée Monde :</strong> ${formData.dureeMonde}</li>`
+                      ? `<li><strong>Durée Monde :</strong> ${enumLabels.dureeMonde[formData.dureeMonde] || formData.dureeMonde}</li>`
                       : ""
                   }
                   ${
                     formData.typeCouverture
-                      ? `<li><strong>Type de couverture :</strong> ${formData.typeCouverture}</li>`
+                      ? `<li><strong>Type de couverture :</strong> ${enumLabels.typeCouverture[formData.typeCouverture] || formData.typeCouverture}</li>`
                       : ""
                   }
                   ${
@@ -386,6 +422,13 @@ async function handleDevisSubmission(request: NextRequest) {
                   <li><strong>Prime :</strong> ${
                     formData.primeAssistance || 350
                   } DH</li>
+                  ${
+                    formData.modePaiement
+                      ? `<li><strong>Mode de paiement :</strong> ${
+                          enumLabels.modePaiement[formData.modePaiement] || formData.modePaiement
+                        }</li>`
+                      : ""
+                  }
                   ${
                     formData.datePreference
                       ? `<li><strong>Date de préférence :</strong> ${new Date(
@@ -943,8 +986,14 @@ async function handleDevisSubmission(request: NextRequest) {
       email: string,
       phone: string,
     ): string => {
+      // Map API enum values to human-readable French labels
       const formatValue = (val: unknown, fieldKey?: string): string => {
         if (val === null || val === undefined) return "Non spécifié";
+
+        // Map enum values to human-readable labels
+        if (fieldKey && typeof val === "string" && enumLabels[fieldKey]) {
+          return enumLabels[fieldKey][val] || val;
+        }
 
         // Handle file/attachment fields (like ficheTechnique)
         if (fieldKey && /fiche|technique|file|attachment/i.test(fieldKey)) {
@@ -1058,6 +1107,7 @@ async function handleDevisSubmission(request: NextRequest) {
           dureeMonde: "Durée Monde",
           vehiculePersonnel: "Véhicule personnel",
           primeAssistance: "Prime (DH)",
+          modePaiement: "Mode de paiement",
           // Plaisance
           typeBateau: "Type de bateau",
           garantiesDeBase: "Garanties de base",
@@ -1250,6 +1300,10 @@ async function handleDevisSubmission(request: NextRequest) {
               <h3 style="color: #1f2937; font-size: 18px; margin-bottom: 20px; margin-top: 0;">👤 Informations du Client</h3>
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
+                  <td style="padding: 8px 0; font-weight: 600; color: #374151; width: 140px;">Référence :</td>
+                  <td style="padding: 8px 0; color: #1f2937; font-weight: 700;">${devisReference}</td>
+                </tr>
+                <tr>
                   <td style="padding: 8px 0; font-weight: 600; color: #374151; width: 140px;">Nom complet :</td>
                   <td style="padding: 8px 0; color: #1f2937;">${firstName} ${lastName}</td>
                 </tr>
@@ -1376,7 +1430,7 @@ async function handleDevisSubmission(request: NextRequest) {
     }
 
     // Submit to Strapi if requested
-    let strapiResult = { success: false, message: "Not submitted to Strapi" };
+    let strapiResult: { success: boolean; message: string; id?: number } = { success: false, message: "Not submitted to Strapi" };
     if (submitToStrapi) {
       try {
         // Use the correct endpoint based on form type
@@ -1500,6 +1554,7 @@ async function handleDevisSubmission(request: NextRequest) {
               typeCouverture: formData.typeCouverture || undefined,
               vehiculePersonnel: formData.vehiculePersonnel || undefined,
               primeAssistance: formData.primeAssistance || 350,
+              modePaiement: formData.modePaiement || undefined,
               notes: formData.notes || undefined,
               conditionsAcceptees:
                 formData.conditionsAcceptees || formData.termsAccepted,
@@ -1765,7 +1820,8 @@ async function handleDevisSubmission(request: NextRequest) {
 
         if (strapiResponse.ok) {
           const strapiData = await strapiResponse.json();
-          strapiResult = { success: true, message: "Data saved to Strapi" };
+          const strapiRecordId = strapiData?.data?.id || strapiData?.id;
+          strapiResult = { success: true, message: "Data saved to Strapi", id: strapiRecordId };
         } else {
           const errorData = await strapiResponse.json();
 
@@ -1802,7 +1858,8 @@ async function handleDevisSubmission(request: NextRequest) {
         messageId: info.messageId,
         strapiResult,
         clientEmailSuccess,
-        devisNumber: `DEV-${Date.now()}`,
+        devisNumber: devisReference,
+        reference: devisReference,
         message: hasValidEmail
           ? clientEmailSuccess
             ? "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais."

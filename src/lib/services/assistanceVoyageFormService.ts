@@ -13,6 +13,7 @@ interface AssistanceVoyageFormData {
   creneauHoraire: string;
   marketingConsent: boolean;
   termsAccepted: boolean;
+  modePaiement: "Paiement en agence" | "Virement bancaire" | "";
 }
 
 const mapFormDataToApi = (formData: AssistanceVoyageFormData) => {
@@ -41,6 +42,12 @@ const mapFormDataToApi = (formData: AssistanceVoyageFormData) => {
   const vehiculePersonnelMapping: Record<string, boolean> = {
     Oui: true,
     Non: false,
+  };
+
+  // Map payment method
+  const modePaiementMapping: Record<string, string> = {
+    "Paiement en agence": "paiement_en_agence",
+    "Virement bancaire": "virement_bancaire",
   };
 
   // Map coverage duration
@@ -103,6 +110,7 @@ const mapFormDataToApi = (formData: AssistanceVoyageFormData) => {
     userAgent: navigator.userAgent,
     source: "website",
     primeAssistance: formData.primedelassistance,
+    modePaiement: modePaiementMapping[formData.modePaiement || "Paiement en agence"] || "paiement_en_agence",
   };
 
   // Add global visa duration for all assistance types (collected in step 1)
@@ -175,6 +183,9 @@ const mapFormDataToApi = (formData: AssistanceVoyageFormData) => {
     notes.push(`Situation familiale: ${formData.situationfamiliale}`);
   }
   notes.push(`Prime: ${formData.primedelassistance} DH`);
+  if (formData.modePaiement) {
+    notes.push(`Mode de paiement: ${formData.modePaiement}`);
+  }
 
   apiData.notes = notes.join(" | ");
 
@@ -188,6 +199,7 @@ export const submitAssistanceVoyageForm = async (
   message: string;
   error?: string;
   type?: string;
+  reference?: string;
 }> => {
   try {
     const apiData = mapFormDataToApi(formData);
@@ -249,6 +261,7 @@ export const submitAssistanceVoyageForm = async (
         message:
           result.message ||
           "Votre demande d'assistance voyage a été transmise avec succès. Notre équipe d'experts vous contactera dans les plus brefs délais pour personnaliser votre couverture.",
+        reference: result.reference || result.devisNumber,
       };
     }
 

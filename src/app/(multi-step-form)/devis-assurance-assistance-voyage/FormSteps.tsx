@@ -28,7 +28,7 @@ function FinalStepSubmitButton({
   currentStepId: string;
   onPrev: () => void;
 }) {
-  const { submitForm, isFormValid, isSubmitting } = useFormContext();
+  const { submitForm, isFormValid, isSubmitting, data } = useFormContext();
   const { completeDraft } = useDraft();
   const handleSubmit = async () => {
     if (!isFormValid(currentStepId)) {
@@ -45,6 +45,24 @@ function FinalStepSubmitButton({
         if (result.success) {
           // 🔹 Mark draft as VALIDE
           completeDraft();
+
+          // Save form data to sessionStorage for dynamic success page
+          try {
+            sessionStorage.setItem("voyageFormData", JSON.stringify({
+              assistanceVoyage: data.assistanceVoyage,
+              primedelassistance: data.primedelassistance,
+              dureedelacouverture: data.dureedelacouverture,
+              transport: data.transport,
+              situationfamiliale: data.situationfamiliale,
+              modePaiement: data.modePaiement,
+              prenom: data.prenom,
+              nom: data.nom,
+              phone: data.phone,
+              email: data.email,
+              dureeVisa: data.dureeVisa,
+              reference: result.reference,
+            }));
+          } catch {}
 
           toast.success(
             "Votre demande d'assistance voyage a été transmise avec succès. Notre équipe d'experts vous contactera dans les plus brefs délais pour personnaliser votre couverture.",
