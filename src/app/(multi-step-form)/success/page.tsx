@@ -1,5 +1,8 @@
+"use client";
+
 import ButtonLink from "@/app/components/buttons/ButtonLink";
-import { SVGProps } from "react";
+import { generateVoyagePdf } from "@/lib/utils/generateVoyagePdf";
+import { SVGProps, useEffect, useState } from "react";
 
 export function IconCheck(props: SVGProps<SVGSVGElement>) {
   return (
@@ -20,6 +23,7 @@ export function IconCheck(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
 export function IconDownload(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -41,6 +45,29 @@ export function IconDownload(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconRefresh(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width={20}
+      height={20}
+      viewBox="0 0 20 20"
+      fill="none"
+    >
+      <path
+        d="M3.33203 9.37467C3.67721 9.37467 3.95703 9.6545 3.95703 9.99967C3.95703 11.602 4.5932 13.1391 5.72624 14.2721C6.85889 15.4048 8.39531 16.0401 9.99707 16.0405C11.6992 16.0339 13.333 15.3706 14.5568 14.1875L15.1566 13.5877H12.9618C12.6166 13.5877 12.3368 13.3079 12.3368 12.9627C12.3368 12.6175 12.6166 12.3377 12.9618 12.3377H16.6654C17.0105 12.3377 17.2904 12.6175 17.2904 12.9627V16.6663C17.2904 17.0115 17.0105 17.2913 16.6654 17.2913C16.3202 17.2913 16.0404 17.0115 16.0404 16.6663V14.4715L15.4259 15.0859C13.97 16.4934 12.0261 17.2837 10.0011 17.2913H9.9987C8.06483 17.2913 6.2099 16.5234 4.84245 15.1559C3.475 13.7885 2.70703 11.9335 2.70703 9.99967C2.70703 9.6545 2.98685 9.37467 3.33203 9.37467Z"
+        fill="#0F110C"
+      />
+      <path
+        d="M9.9987 2.70801C11.9326 2.70801 13.7875 3.47597 15.1549 4.84342C16.5224 6.21088 17.2904 8.0658 17.2904 9.99967C17.2904 10.3449 17.0105 10.6247 16.6654 10.6247C16.3202 10.6247 16.0404 10.3449 16.0404 9.99967C16.0404 8.39733 15.4042 6.86025 14.2712 5.72721C13.1383 4.59437 11.6016 3.95822 9.99951 3.95801C8.29766 3.96481 6.66423 4.62899 5.44059 5.81185L4.84082 6.41162H7.03564C7.38079 6.41162 7.6606 6.69148 7.66064 7.03662C7.66064 7.3818 7.38082 7.66162 7.03564 7.66162H3.33203C2.98685 7.66162 2.70703 7.3818 2.70703 7.03662V3.33301C2.70703 2.98783 2.98685 2.70801 3.33203 2.70801C3.67721 2.70801 3.95703 2.98783 3.95703 3.33301V5.52783L4.57145 4.91341C6.02737 3.50594 7.97126 2.71565 9.99626 2.70801H9.9987Z"
+        fill="#0F110C"
+      />
+    </svg>
+  );
+}
+
 export function IconInfo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -68,108 +95,177 @@ export function IconInfo(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-export function IconRefresh(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
-      viewBox="0 0 20 20"
-      fill="none"
-    >
-      <path
-        d="M3.33203 9.37467C3.67721 9.37467 3.95703 9.6545 3.95703 9.99967C3.95703 11.602 4.5932 13.1391 5.72624 14.2721C6.85889 15.4048 8.39531 16.0401 9.99707 16.0405C11.6992 16.0339 13.333 15.3706 14.5568 14.1875L15.1566 13.5877H12.9618C12.6166 13.5877 12.3368 13.3079 12.3368 12.9627C12.3368 12.6175 12.6166 12.3377 12.9618 12.3377H16.6654C17.0105 12.3377 17.2904 12.6175 17.2904 12.9627V16.6663C17.2904 17.0115 17.0105 17.2913 16.6654 17.2913C16.3202 17.2913 16.0404 17.0115 16.0404 16.6663V14.4715L15.4259 15.0859C13.97 16.4934 12.0261 17.2837 10.0011 17.2913H9.9987C8.06483 17.2913 6.2099 16.5234 4.84245 15.1559C3.475 13.7885 2.70703 11.9335 2.70703 9.99967C2.70703 9.6545 2.98685 9.37467 3.33203 9.37467Z"
-        fill="#0F110C"
-      />
-      <path
-        d="M9.9987 2.70801C11.9326 2.70801 13.7875 3.47597 15.1549 4.84342C16.5224 6.21088 17.2904 8.0658 17.2904 9.99967C17.2904 10.3449 17.0105 10.6247 16.6654 10.6247C16.3202 10.6247 16.0404 10.3449 16.0404 9.99967C16.0404 8.39733 15.4042 6.86025 14.2712 5.72721C13.1383 4.59437 11.6016 3.95822 9.99951 3.95801C8.29766 3.96481 6.66423 4.62899 5.44059 5.81185L4.84082 6.41162H7.03564C7.38079 6.41162 7.6606 6.69148 7.66064 7.03662C7.66064 7.3818 7.38082 7.66162 7.03564 7.66162H3.33203C2.98685 7.66162 2.70703 7.3818 2.70703 7.03662V3.33301C2.70703 2.98783 2.98685 2.70801 3.33203 2.70801C3.67721 2.70801 3.95703 2.98783 3.95703 3.33301V5.52783L4.57145 4.91341C6.02737 3.50594 7.97126 2.71565 9.99626 2.70801H9.9987Z"
-        fill="#0F110C"
-      />
-    </svg>
-  );
+
+type VoyageFormData = {
+  assistanceVoyage: string;
+  primedelassistance: number;
+  dureedelacouverture: string;
+  transport: string;
+  situationfamiliale: string;
+  modePaiement: string;
+  prenom: string;
+  nom: string;
+  phone: string;
+  email: string;
+  dureeVisa: string;
+  reference?: string;
+};
+
+function generateReference(): string {
+  const now = new Date();
+  const num = String(now.getFullYear()).slice(-2) +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    String(Math.floor(Math.random() * 9000) + 1000);
+  return `TRT-${num}`;
 }
 
 export default function SuccessPage() {
+  const [formData, setFormData] = useState<VoyageFormData | null>(null);
+  const [reference, setReference] = useState("");
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("voyageFormData");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setFormData(parsed);
+        // Use the reference from the API (Strapi record ID), fallback to generated
+        setReference(parsed.reference || generateReference());
+        sessionStorage.removeItem("voyageFormData");
+      } else {
+        setReference(generateReference());
+      }
+    } catch {
+      setReference(generateReference());
+    }
+  }, []);
+
+  // Build display label for assistance type
+  const getAssistanceLabel = (type: string) => {
+    switch (type) {
+      case "Schengen": return "Assistance Schengen";
+      case "Monde": return "Assistance Monde";
+      case "Étudiant": return "Assistance Étudiant";
+      case "Expatrié": return "Assistance Expatrié";
+      default: return type || "Assistance Voyage";
+    }
+  };
+
   return (
-    <section className="relative pt-[200px] pb-11 px-4 w-full flex-center flex-col gap-6 ">
+    <section className="relative pt-[200px] pb-11 px-4 w-full flex-center flex-col gap-6">
       <div
         className="absolute inset-0 w-full h-[200px] bg-green-100 -z-[1]
-        bg-[url('/success-overlay.png'),linear-gradient(180deg,var(--color-Primary-300)_0%,var(--color-white)_100%)] 
+        bg-[url('/success-overlay.png'),linear-gradient(180deg,var(--color-Primary-300)_0%,var(--color-white)_100%)]
         bg-top bg-no-repeat max-tablet:bg-cover flex items-end justify-center"
       >
         <div className="flex p-5 rounded-full bg-Brand-500">
-          <IconCheck className=" shrink-0" />
+          <IconCheck className="shrink-0" />
         </div>
       </div>
       <div className="mt-6 text-center items-center f-col gap-2">
         <h3 className="Headings-H3">Demande validée avec succès</h3>
         <p className="text-Text-Body Text-M">
-          Merci, votre demande a bien été prise en compte.
+          {formData
+            ? `Merci ${formData.prenom}, votre demande a bien été prise en compte.`
+            : "Merci, votre demande a bien été prise en compte."}
         </p>
       </div>
-      <div className="f-col gap-2 w-full w-full max-w-[1180px]">
+      <div className="f-col gap-2 w-full max-w-[1180px]">
+        {/* Order summary card */}
         <div className="p-2 bg-Sage-Gray-Lowest rounded-3xl">
           <div className="p-5 rounded-2xl bg-white f-col items-end shadow-md">
             <div className="f-col gap-5 w-full">
               <h5 className="Headings-H5">Votre demande</h5>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
                 <span className="Text-M text-Sage-Gray-Higher">Référence</span>
-                <span className="button-s">TRT-45821</span>
+                <span className="button-s">{reference}</span>
 
                 <span className="Text-M text-Sage-Gray-Higher">Produit</span>
-                <span className="button-s">Assurance Schengen</span>
-
-                <span className="Text-M text-Sage-Gray-Higher">Durée</span>
-                <span className="button-s">6 mois</span>
-
-                <span className="Text-M text-Sage-Gray-Higher">
-                  Option véhicule
+                <span className="button-s">
+                  {formData
+                    ? getAssistanceLabel(formData.assistanceVoyage)
+                    : "Assistance Voyage"}
                 </span>
-                <span className="button-s">Oui</span>
+
+                {formData?.dureedelacouverture && (
+                  <>
+                    <span className="Text-M text-Sage-Gray-Higher">Durée</span>
+                    <span className="button-s">
+                      {formData.dureedelacouverture}
+                    </span>
+                  </>
+                )}
+
+                {formData?.transport && (
+                  <>
+                    <span className="Text-M text-Sage-Gray-Higher">
+                      Option véhicule
+                    </span>
+                    <span className="button-s">{formData.transport}</span>
+                  </>
+                )}
+
+                {formData?.situationfamiliale && (
+                  <>
+                    <span className="Text-M text-Sage-Gray-Higher">
+                      Situation familiale
+                    </span>
+                    <span className="button-s">
+                      {formData.situationfamiliale}
+                    </span>
+                  </>
+                )}
 
                 <span className="Text-M text-Sage-Gray-Higher">
                   Mode de paiement
                 </span>
-                <span className="button-s">Paiement en agence</span>
+                <span className="button-s">
+                  {formData?.modePaiement || "Paiement en agence"}
+                </span>
               </ul>
             </div>
             <div className="f-col">
               <span className="Text-M text-Sage-Gray-High">Montant</span>
               <div className="flex gap-2 items-baseline">
-                <span className="Headings-H2">500 DH</span>
+                <span className="Headings-H2">
+                  {formData?.primedelassistance || 350} DH
+                </span>
                 <span className="Text-M text-Sage-Gray-High">TTC</span>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Paiement en agence section */}
         <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-          <div className="p-5 rounded-2xl bg-white flex items-start justify-between gap-3 shadow-md">
+          <div className="p-5 rounded-2xl bg-white flex items-start justify-between gap-3 shadow-md max-mobile:flex-col">
             <ul className="f-col gap-1">
               <li className="f-col gap-3">
                 <span className="Headings-H5">Prochaine étape :</span>
                 <span className="Text-M text-Text-Body">
-                  Présentez-vous dans l’une de nos agences avec votre référence
-                  :
+                  Présentez-vous dans l&apos;une de nos agences avec votre
+                  référence :
                 </span>
               </li>
               <li className="f-col gap-3">
-                <span className="Headings-H5">TRT-45821</span>
+                <span className="Headings-H5">{reference}</span>
                 <span className="Text-M text-Text-Body">
                   Un conseiller finalisera votre contrat.
                 </span>
               </li>
             </ul>
-            <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
-              <IconInfo className=" shrink-0" />
+            <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower shrink-0">
+              <IconInfo className="shrink-0" />
               <span className="button-s text-Sage-Gray-Higher">
                 Nos équipes sont disponibles du lundi au vendredi
               </span>
             </div>
           </div>
         </div>
+        {/* Virement bancaire section */}
         <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-          <div className="p-5 rounded-2xl bg-white flex justify-between gap-3 shadow-md">
+          <div className="p-5 rounded-2xl bg-white flex justify-between gap-3 shadow-md max-mobile:flex-col">
             <div className="f-col gap-3">
               <span className="Headings-H5">Prochaine étape :</span>
               <div className="f-col">
@@ -177,14 +273,14 @@ export default function SuccessPage() {
                   Les coordonnées bancaires vous ont été envoyées par email.
                 </span>
                 <span className="Text-M text-Text-Body">
-                  Merci d’indiquer votre référence dans le motif :
+                  Merci d&apos;indiquer votre référence dans le motif :
                 </span>
-                <span className="Headings-H4 mt-1">TRT-45821</span>
+                <span className="Headings-H4 mt-1">{reference}</span>
               </div>
             </div>
-            <div className="f-col items-end justify-between">
+            <div className="f-col items-end justify-between shrink-0 max-mobile:items-start max-mobile:gap-3">
               <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
-                <IconInfo className=" shrink-0" />
+                <IconInfo className="shrink-0" />
                 <span className="button-s text-Sage-Gray-Higher">
                   Vérifiez votre boîte de réception (et les spams)
                 </span>
@@ -194,8 +290,8 @@ export default function SuccessPage() {
                 className="flex items-center gap-1 py-2 px-4 rounded-full bg-Sage-Gray-Lower
           transition hover:bg-Sage-Gray-Low cursor-pointer button-s"
               >
-                <span>Renvoyer l’email</span>
-                <IconRefresh className=" shrink-0" />
+                <span>Renvoyer l&apos;email</span>
+                <IconRefresh className="shrink-0" />
               </button>
             </div>
           </div>
@@ -204,7 +300,7 @@ export default function SuccessPage() {
       <div className="flex max-mobile:flex-col gap-3">
         <ButtonLink
           href="/"
-          label="Retour à l’accueil"
+          label="Retour à l'accueil"
           size="large"
           iconClassName="w-7 h-7"
           color="white"
@@ -214,10 +310,18 @@ export default function SuccessPage() {
         />
         <button
           type="button"
-          className="flex items-center gap-2 py-3 px-5 rounded-full bg-Sage-Gray-Lower
-          transition hover:bg-Sage-Gray-Low cursor-pointer Button-M"
+          onClick={() => {
+            if (formData && reference) {
+              generateVoyagePdf({ ...formData, reference });
+            }
+          }}
+          disabled={!formData || !reference}
+          className={`flex items-center gap-2 py-3 px-5 rounded-full bg-Sage-Gray-Lower
+          transition hover:bg-Sage-Gray-Low cursor-pointer Button-M ${
+            !formData || !reference ? "opacity-50 pointer-events-none" : ""
+          }`}
         >
-          <IconDownload className=" shrink-0" />
+          <IconDownload className="shrink-0" />
           <span>Télécharger le récapitulatif (PDF)</span>
         </button>
       </div>
