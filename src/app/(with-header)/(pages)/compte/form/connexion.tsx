@@ -169,7 +169,7 @@ export default function ConnexionForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-center gap-1 flex-1 py-2 px-4 rounded-full bg-Brand-500 text-white
+          className="flex-center gap-1 flex-1 py-2 px-4 rounded-full bg-Brand-500 text-white transition
            hover:bg-Brand-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           <span>{isSubmitting ? "..." : "Se connecter"}</span>

@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState } from "react";
 
-type PopupType = "Search" | "Enregistrer" | "Supprimer le devis" | null;
+type PopupType = "Search" | "Enregistrer" | "Supprimer le devis" | "PopupCompteAssurance" | null;
 
 interface PopupContextType {
   activePopup: PopupType;

@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { usePopup } from "./PopupContext";
 import { SVGProps } from "react";
-import { deleteDraft } from "@/app/(with-header)/(pages)/drafts/draftManager";
 import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
 
 export function IconDelete(props: SVGProps<SVGSVGElement>) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import ButtonLink from "../../buttons/ButtonLink";
 import { BurgerMenuIcon } from "../../icons/Burger-Menu";
 import { Logosvg } from "../../logo/logo";
@@ -11,7 +11,6 @@ import Wrapper1180 from "../../wrapper/wrapper-1180";
 import { SVGProps } from "react";
 import Link from "next/link";
 import { usePopup } from "../../popup/PopupContext";
-import { getDrafts } from "@/app/(with-header)/(pages)/drafts/draftManager";
 import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
 
 export function IconSearch(props: SVGProps<SVGSVGElement>) {
@@ -28,7 +27,7 @@ export function IconSearch(props: SVGProps<SVGSVGElement>) {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M9.16667 1.875C13.1937 1.875 16.4583 5.13959 16.4583 9.16667C16.4583 10.9552 15.8131 12.5921 14.7445 13.8607L17.9419 17.0581L17.985 17.1053C18.1853 17.3508 18.1707 17.7131 17.9419 17.9419C17.7131 18.1707 17.3508 18.1853 17.1053 17.985L17.0581 17.9419L13.8607 14.7445C12.5921 15.8131 10.9552 16.4583 9.16667 16.4583C5.13959 16.4583 1.875 13.1937 1.875 9.16667C1.875 5.13959 5.13959 1.875 9.16667 1.875ZM9.16667 3.125C5.82995 3.125 3.125 5.82995 3.125 9.16667C3.125 12.5034 5.82995 15.2083 9.16667 15.2083C12.5034 15.2083 15.2083 12.5034 15.2083 9.16667C15.2083 5.82995 12.5034 3.125 9.16667 3.125Z"
-        fill="#0F110C"
+        fill="currentColor"
       />
     </svg>
   );
