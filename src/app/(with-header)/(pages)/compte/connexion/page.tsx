@@ -1,5 +1,8 @@
+"use client";
+
 import { Suspense } from "react";
 import ConnexionForm from "../form/connexion";
+import GuestGuard from "@/app/components/auth/GuestGuard";
 import { SVGProps } from "react";
 
 export function IconPhone(props: SVGProps<SVGSVGElement>) {
@@ -55,6 +58,7 @@ export const contacts = [
 
 export default function ConnexionPage() {
   return (
+    <GuestGuard>
     <main className="relative max-w-[1180px] mx-auto f-col items-center pt-[66px] pb[132px] gap-[164px] px-4">
       <div className="f-col gap-9 w-full max-w-[380px]">
         <div className="f-col items-center gap-3 text-center">
@@ -85,5 +89,6 @@ export default function ConnexionPage() {
         </ul>
       </div>
     </main>
+    </GuestGuard>
   );
 }

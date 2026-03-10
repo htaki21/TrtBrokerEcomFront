@@ -2,11 +2,20 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { ConnexionData, ConnexionSchema } from "./connexion-schema";
+import { useState, useEffect } from "react";
+import { z } from "zod";
 import { IconeyeClosed, Iconeye } from "./connexion";
 import { SVGProps } from "react";
 import { IconMail, IconPhone } from "../connexion/page";
+import { useAuth } from "@/app/components/auth/AuthContext";
+import toast from "react-hot-toast";
+
+const InfoSchema = z.object({
+  email: z.string().min(1, "Email requis").email("Email invalide"),
+  password: z.string().min(8, "Min. 8 caractères").optional().or(z.literal("")),
+});
+
+type InfoData = z.infer<typeof InfoSchema>;
 
 export function IconUser(props: SVGProps<SVGSVGElement>) {
   return (
@@ -79,23 +88,44 @@ export function IconPencil(props: SVGProps<SVGSVGElement>) {
 export default function InfoPersonnellesForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { user, update, refreshUser } = useAuth();
 
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ConnexionData>({
-    resolver: zodResolver(ConnexionSchema),
+  } = useForm<InfoData>({
+    resolver: zodResolver(InfoSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
-        email: "karim.b@email.ma",
-        password: "12345678"
+      email: user?.email || "",
+      password: "",
     },
   });
 
-  const onSubmit = async (data: ConnexionData) => {};
+  useEffect(() => {
+    if (user) {
+      reset({ email: user.email, password: "" });
+    }
+  }, [user, reset]);
+
+  const onSubmit = async (data: InfoData) => {
+    setSubmitError(null);
+    try {
+      const payload: Record<string, string> = {};
+      if (data.email !== user?.email) payload.email = data.email;
+      if (data.password) payload.password = data.password;
+      if (Object.keys(payload).length === 0) return;
+      await update(payload);
+      await refreshUser();
+      reset({ email: data.email, password: "" });
+      toast.success("Informations mises à jour");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Erreur lors de la mise à jour");
+    }
+  };
 
   return (
     <form
@@ -111,7 +141,7 @@ export default function InfoPersonnellesForm() {
           <span>Nom complet</span>
           <div className="flex items-center gap-2 py-3 px-4 rounded-[8px] bg-Sage-Gray-Lowest">
             <IconUser className=" shrink-0" />
-            <span>Karim Bennani</span>
+            <span>{user?.nom || user?.username || "—"}</span>
           </div>
         </div>
 
@@ -153,7 +183,7 @@ export default function InfoPersonnellesForm() {
           <span>Téléphone</span>
           <div className="flex items-center gap-2 py-3 px-4 rounded-[8px] bg-Sage-Gray-Lowest">
             <IconPhone className="size-5 shrink-0" />
-            <span>06 12 34 56 78</span>
+            <span>{user?.telephone || "—"}</span>
           </div>
         </div>
 
@@ -211,7 +241,7 @@ export default function InfoPersonnellesForm() {
         className="flex-center gap-1 flex-1 py-2 px-4 rounded-full bg-Brand-500 text-white
            hover:bg-Brand-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
-        <span>{isSubmitting ? "..." : "Enregister"}</span>
+        <span>{isSubmitting ? "..." : "Enregistrer"}</span>
       </button>
     </form>
   );

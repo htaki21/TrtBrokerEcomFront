@@ -1,10 +1,14 @@
+"use client";
+
 import { Suspense } from "react";
 import { contacts } from "../connexion/page";
 import InscriptionForm from "../form/inscription";
+import GuestGuard from "@/app/components/auth/GuestGuard";
 
 
-export default function inscriptionPage() {
+export default function InscriptionPage() {
   return (
+    <GuestGuard>
     <main className="relative max-w-[1180px] mx-auto f-col items-center pt-[38px] pb[132px] gap-[108px] px-4">
       <div className="f-col gap-9 w-full max-w-[580px]">
         <div className="f-col items-center gap-3 text-center">
@@ -35,5 +39,6 @@ export default function inscriptionPage() {
         </ul>
       </div>
     </main>
+    </GuestGuard>
   );
 }

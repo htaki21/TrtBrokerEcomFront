@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { PopupProvider } from "./components/popup/PopupContext";
 import { DraftProvider } from "./(with-header)/(pages)/drafts/DraftContext";
+import { AuthProvider } from "./components/auth/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -198,6 +199,7 @@ export default function RootLayout({
             __html: JSON.stringify(websiteData),
           }}
         />
+        <AuthProvider>
         <DraftProvider>
           <PopupProvider>
             <HeroUIProvider>
@@ -231,6 +233,7 @@ export default function RootLayout({
             </HeroUIProvider>
           </PopupProvider>
         </DraftProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { SVGProps, useState } from "react";
+import { useRouter } from "next/navigation";
 import InfoPersonnellesForm from "./form/Info-personnelles";
 import { IconSearch } from "@/app/components/header/components/head-desktop";
 import { IconSearchClear } from "@/app/components/popup/PopupSearch";
 import PopupCompteAssurance from "@/app/components/popup/PopupCompteAssurance";
+import PopupSupprimerCompte from "@/app/components/popup/PopupSupprimerCompte";
 import { usePopup } from "@/app/components/popup/PopupContext";
+import AuthGuard from "@/app/components/auth/AuthGuard";
+import { useAuth } from "@/app/components/auth/AuthContext";
 
 export function IconProfile(props: SVGProps<SVGSVGElement>) {
   return (
@@ -196,21 +200,32 @@ export function IconDownload(props: SVGProps<SVGSVGElement>) {
 
 export default function ComptePage() {
   const { open } = usePopup();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [value, setValue] = useState("");
   const clear = () => setValue("");
 
   const tabs = ["Informations personnelles", "Mes contrats"];
 
+  const handleLogout = () => {
+    logout();
+    router.push("/compte/connexion");
+  };
+
+  const displayName = user?.nom || user?.username || "Utilisateur";
+  const displayEmail = user?.email || "";
+
   return (
+    <AuthGuard>
     <main className="relative w-full max-w-[780px] mx-auto f-col gap-6 pt-[38px] pb[64px] px-4">
       <div className="flex items-center gap-4">
         <span className="p-2 flex-center size-[108px] rounded-full overflow-hidden bg-[#E2EFCE]">
           <IconProfile className=" shrink-0" />
         </span>
         <div className="f-col gap-1 flex-1">
-          <h4 className="Headings-H4">Karim Bennani</h4>
-          <p className="text-Sage-Gray-Higher Text-M">karim.b@email.ma</p>
+          <h4 className="Headings-H4">{displayName}</h4>
+          <p className="text-Sage-Gray-Higher Text-M">{displayEmail}</p>
         </div>
         <div className="f-col gap-1.5 button-s">
           <Link
@@ -255,6 +270,7 @@ export default function ComptePage() {
               </div>
               <button
                 type="button"
+                onClick={() => open("SupprimerCompte")}
                 className="py-2 px-4 flex items-center gap-1 text-white bg-Secondary-Red-Medium
                  rounded-full button2-s hover:bg-Secondary-Red-Higher cursor-pointer transition"
               >
@@ -371,6 +387,8 @@ export default function ComptePage() {
           </div>
         )}
       </div>
+      <PopupSupprimerCompte />
     </main>
+    </AuthGuard>
   );
 }

@@ -752,7 +752,7 @@ export function getSecurityHeaders(): Record<string, string> {
       "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self'",
+      "connect-src 'self' http://localhost:1337 https://trtecomadminv2.deadlinemaroc.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

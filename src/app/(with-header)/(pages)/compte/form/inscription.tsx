@@ -4,9 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconeyeClosed, Iconeye, IconAroowLeft } from "./connexion";
 import { InscriptionData, InscriptionSchema } from "./inscription-schema";
 import { SVGProps } from "react";
+import { useAuth } from "@/app/components/auth/AuthContext";
 
 export function Iconcheck(props: SVGProps<SVGSVGElement>) {
   return (
@@ -66,6 +68,8 @@ const checkboxItems: CheckboxItem[] = [
 export default function InscriptionForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { register: registerUser } = useAuth();
+  const router = useRouter();
 
   const {
     register,
@@ -79,7 +83,21 @@ export default function InscriptionForm() {
     reValidateMode: "onChange",
   });
 
-  const onSubmit = async (data: InscriptionData) => {};
+  const onSubmit = async (data: InscriptionData) => {
+    setSubmitError(null);
+    try {
+      await registerUser({
+        nom: data.nom,
+        email: data.email,
+        password: data.password,
+        telephone: data.telephone || undefined,
+        newsletter: data.newsletter || false,
+      });
+      router.replace("/compte");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Erreur lors de l'inscription");
+    }
+  };
 
   return (
     <form
@@ -239,7 +257,7 @@ export default function InscriptionForm() {
         </button>
         <div className="f-col items-center gap-1">
           <p>Vous avez déjà un compte ?</p>
-          <Link href="/connexion" className="text-Brand-600 border-b w-fit">
+          <Link href="/compte/connexion" className="text-Brand-600 border-b w-fit">
             Se connecter
           </Link>
         </div>

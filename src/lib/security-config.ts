@@ -133,7 +133,7 @@ export const SECURITY_CONFIG = {
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';",
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:1337 https://trtecomadminv2.deadlinemaroc.com; frame-ancestors 'none';",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     "Permissions-Policy":
       "camera=(), microphone=(), geolocation=(), interest-cohort=()",
@@ -246,7 +246,7 @@ export const SECURITY_CONFIG = {
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "https:"],
       "font-src": ["'self'", "data:"],
-      "connect-src": ["'self'"],
+      "connect-src": ["'self'", "http://localhost:1337", "https://trtecomadminv2.deadlinemaroc.com"],
       "frame-ancestors": ["'none'"],
       "base-uri": ["'self'"],
       "form-action": ["'self'"],

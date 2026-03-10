@@ -4,8 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ConnexionData, ConnexionSchema } from "./connexion-schema";
 import { SVGProps } from "react";
+import { useAuth } from "@/app/components/auth/AuthContext";
 
 export function Iconeye(props: SVGProps<SVGSVGElement>) {
   return (
@@ -78,6 +80,8 @@ export function IconAroowLeft(props: SVGProps<SVGSVGElement>) {
 export default function ConnexionForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const router = useRouter();
 
   const {
     register,
@@ -90,7 +94,15 @@ export default function ConnexionForm() {
     reValidateMode: "onChange",
   });
 
-  const onSubmit = async (data: ConnexionData) => {};
+  const onSubmit = async (data: ConnexionData) => {
+    setSubmitError(null);
+    try {
+      await login(data.email, data.password);
+      router.replace("/compte");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Erreur de connexion");
+    }
+  };
 
   return (
     <form
@@ -178,7 +190,7 @@ export default function ConnexionForm() {
         <div className="f-col items-center gap-1">
           <p>Vous n’avez pas encore de compte ?</p>
           <Link
-            href="/inscription"
+            href="/compte/inscription"
             className="text-Sage-Gray-Higher border-b w-fit"
           >
             Créer un compte

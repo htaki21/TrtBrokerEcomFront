@@ -12,6 +12,7 @@ import { SVGProps } from "react";
 import Link from "next/link";
 import { usePopup } from "../../popup/PopupContext";
 import { useDraft } from "@/app/(with-header)/(pages)/drafts/DraftContext";
+import { useAuth } from "../../auth/AuthContext";
 
 export function IconSearch(props: SVGProps<SVGSVGElement>) {
   return (
@@ -128,6 +129,7 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
 
   const { drafts } = useDraft();
   const draftCount = drafts.length;
+  const { user } = useAuth();
 
   return (
     <div
@@ -164,9 +166,12 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
               )}
               <Iconshoppingcart className="shrink-0" />
             </Link>
-            <span className="flex p-2 rounded-full bg-BG-BG-3-3 hover:bg-Sage-Gray-Higher transition cursor-pointer">
+            <Link
+              href={user ? "/compte" : "/compte/connexion"}
+              className="flex p-2 rounded-full bg-BG-BG-3-3 hover:bg-Sage-Gray-Higher transition cursor-pointer"
+            >
               <Iconuser className=" shrink-0" />
-            </span>
+            </Link>
             <ButtonLink
               href="/contact"
               iconClassName="w-5 h-5 max-laptop:hidden"
