@@ -82,11 +82,15 @@ export async function loginUser(identifier: string, password: string): Promise<A
   if (!res.ok) {
     // Strapi can return errors in multiple formats depending on version
     const errMsg =
-      data?.error?.message ||           // Strapi v4/v5: { error: { message: "..." } }
-      data?.message?.[0]?.messages?.[0]?.message || // Strapi v3: { message: [{ messages: [{ message }] }] }
-      data?.message ||                  // Simple: { message: "..." }
-      (typeof data === "string" ? data : "");
-    console.log("[TRT Auth] Login error response:", JSON.stringify(data));
+      (typeof data?.error === "object" ? data.error.message : undefined) || // Strapi v4: { error: { message } }
+      data?.message?.[0]?.messages?.[0]?.message || // Strapi v3
+      (typeof data?.message === "string" ? data.message : undefined) || // Strapi v5: { error: "ApplicationError", message: "..." }
+      "";
+
+    // A 500 on login usually means email confirmation is misconfigured
+    if (res.status === 500) {
+      throw new Error("Votre adresse email n'est pas encore vérifiée, ou une erreur serveur est survenue. Vérifiez votre boîte mail.");
+    }
     throw new Error(translateError(errMsg, "Erreur de connexion. Vérifiez vos identifiants."));
   }
 
