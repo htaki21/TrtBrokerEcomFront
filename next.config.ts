@@ -44,11 +44,11 @@ function getStrapiImagePatterns(): NextConfig["images"] {
 
 const nextConfig: NextConfig = {
   images: getStrapiImagePatterns(),
-  // Enable experimental features for better caching
+  // Reduce prefetch load on server
   experimental: {
     staleTimes: {
-      dynamic: 30, // 30 seconds for dynamic content
-      static: 180, // 3 minutes for static content
+      dynamic: 300, // 5 minutes for dynamic content
+      static: 600,  // 10 minutes for static content
     },
   },
   // Add headers for better caching

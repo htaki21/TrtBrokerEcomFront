@@ -22,5 +22,8 @@ RUN npm ci --only=production
 # Expose port 3000
 EXPOSE 3000
 
+# Allow more memory for the Next.js server
+ENV NODE_OPTIONS="--max-old-space-size=512"
+
 # Start the application
 CMD ["npm", "start"]
