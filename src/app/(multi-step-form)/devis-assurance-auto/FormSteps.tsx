@@ -22,7 +22,12 @@ import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
   const { data, setData, clearFieldError } = useFormContext(); // your form state hook
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("form_auto_step");
+      return saved ? parseInt(saved, 10) : 0;
+    } catch { return 0; }
+  });
 
   const stepDataList = [
     step1Data,
@@ -92,6 +97,28 @@ export default function FormSteps() {
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
+
+  // 🔄 Persist form state to sessionStorage on change
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("form_auto_step", String(currentStepIndex));
+      sessionStorage.setItem("form_auto_data", JSON.stringify(data));
+    } catch {}
+  }, [currentStepIndex, data]);
+
+  // 🔄 Restore form data from sessionStorage on mount
+  useEffect(() => {
+    if (draftId) return; // skip if restoring from draft
+    try {
+      const savedData = sessionStorage.getItem("form_auto_data");
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 1) {
+          setData(parsed);
+        }
+      }
+    } catch {}
+  }, []);
 
   // 1️⃣ Restore draft if URL contains draftId
   useEffect(() => {

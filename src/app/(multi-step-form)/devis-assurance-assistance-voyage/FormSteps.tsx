@@ -62,6 +62,13 @@ function FinalStepSubmitButton({
               dureeVisa: data.dureeVisa,
               reference: result.reference,
             }));
+            // Clear form persistence keys
+            ["auto","habitation","moto","sante","plaisance","accidents","voyage"].forEach((k) => {
+              sessionStorage.removeItem(`form_${k}_step`);
+              sessionStorage.removeItem(`form_${k}_data`);
+              sessionStorage.removeItem(`form_${k}_stepId`);
+              sessionStorage.removeItem(`form_${k}_history`);
+            });
             // Also save in generic format
             sessionStorage.setItem("formSuccessData", JSON.stringify({
               productName: "Assistance Voyage",
@@ -241,9 +248,12 @@ export default function FormSteps() {
     d3: { ...step3Data, component: <Step3 /> },
   };
 
-  const [currentStepId, setCurrentStepId] =
-    useState<keyof typeof stepConfig>("step1");
-  const [history, setHistory] = useState<string[]>(["step1"]);
+  const [currentStepId, setCurrentStepId] = useState<keyof typeof stepConfig>(() => {
+    try { return (sessionStorage.getItem("form_voyage_stepId") as keyof typeof stepConfig) || "step1"; } catch { return "step1"; }
+  });
+  const [history, setHistory] = useState<string[]>(() => {
+    try { const s = sessionStorage.getItem("form_voyage_history"); return s ? JSON.parse(s) : ["step1"]; } catch { return ["step1"]; }
+  });
 
   const currentStep = stepConfig[currentStepId];
 
@@ -316,6 +326,21 @@ export default function FormSteps() {
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("form_voyage_stepId", currentStepId);
+      sessionStorage.setItem("form_voyage_history", JSON.stringify(history));
+      sessionStorage.setItem("form_voyage_data", JSON.stringify(data));
+    } catch {}
+  }, [currentStepId, history, data]);
+  useEffect(() => {
+    if (draftId) return;
+    try {
+      const s = sessionStorage.getItem("form_voyage_data");
+      if (s) { const p = JSON.parse(s); if (p && typeof p === "object" && Object.keys(p).length > 1) setData(p); }
+    } catch {}
+  }, []);
 
   // 1️⃣ Restore draft if URL contains draftId
 useEffect(() => {

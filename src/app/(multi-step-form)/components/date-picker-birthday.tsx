@@ -22,6 +22,7 @@ interface BirthdayCalendarProps<
   value?: Date;
   onChange?: (date: Date | undefined) => void;
   error?: string;
+  isRequired?: boolean;
 }
 
 export function BirthdayCalendar<
@@ -34,6 +35,7 @@ export function BirthdayCalendar<
   value,
   onChange,
   error,
+  isRequired,
 }: BirthdayCalendarProps<FormDataType>) {
   const [open, setOpen] = React.useState(false);
   const [localDate, setLocalDate] = React.useState<Date | undefined>(value);
@@ -72,6 +74,7 @@ export function BirthdayCalendar<
               label={label}
               placeholder={placeholder}
               error={error}
+              isRequired={isRequired}
             />
           );
         }}
@@ -90,6 +93,7 @@ export function BirthdayCalendar<
       label={label}
       placeholder={placeholder}
       error={error}
+      isRequired={isRequired}
     />
   );
 }
@@ -104,6 +108,7 @@ interface BirthdayDatePickerUIProps {
   label?: string;
   placeholder?: string;
   error?: string;
+  isRequired?: boolean;
 }
 
 function BirthdayDatePickerUI({
@@ -115,6 +120,7 @@ function BirthdayDatePickerUI({
   label,
   placeholder,
   error,
+  isRequired,
 }: BirthdayDatePickerUIProps) {
   return (
     <div className="flex w-full flex-col gap-2 relative">
@@ -123,7 +129,7 @@ function BirthdayDatePickerUI({
           htmlFor="date-picker"
           className="text-Neutral-Dark px-1 font-normal text-[14px]/[20px]"
         >
-          {label}
+          {label}{isRequired && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
       )}
       <Popover open={open} onOpenChange={setOpen}>

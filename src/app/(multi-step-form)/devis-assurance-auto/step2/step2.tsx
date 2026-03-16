@@ -6,6 +6,8 @@ export default function Step2() {
 
   return (
     <CalendarTransparent
+      label="Date de mise en circulation"
+      isRequired
       useFormContextHook={
         useFormContext as unknown as () => {
           data: Record<string, unknown>;

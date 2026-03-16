@@ -16,7 +16,9 @@ import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
   const { data, setData, clearFieldError } = useFormContext(); // ✅ safe, inside provider
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
+    try { const s = sessionStorage.getItem("form_moto_step"); return s ? parseInt(s, 10) : 0; } catch { return 0; }
+  });
 
   const stepDataList = [step1Data, step2Data, step3Data, step4Data];
 
@@ -59,6 +61,14 @@ export default function FormSteps() {
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
+
+  useEffect(() => {
+    try { sessionStorage.setItem("form_moto_step", String(currentStepIndex)); sessionStorage.setItem("form_moto_data", JSON.stringify(data)); } catch {}
+  }, [currentStepIndex, data]);
+  useEffect(() => {
+    if (draftId) return;
+    try { const s = sessionStorage.getItem("form_moto_data"); if (s) { const p = JSON.parse(s); if (p && typeof p === "object" && Object.keys(p).length > 1) setData(p); } } catch {}
+  }, []);
 
   // 1️⃣ Restore draft if URL contains draftId
   useEffect(() => {

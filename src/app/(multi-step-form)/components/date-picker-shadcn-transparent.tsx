@@ -20,10 +20,14 @@ interface CalendarTransparentProps {
         | Record<string, unknown>
     ) => void;
   };
+  label?: string;
+  isRequired?: boolean;
 }
 
 export function CalendarTransparent({
   useFormContextHook,
+  label,
+  isRequired,
 }: CalendarTransparentProps) {
   const { data, setData } = useFormContextHook();
   const [open, setOpen] = React.useState(false);
@@ -48,9 +52,11 @@ export function CalendarTransparent({
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <Label htmlFor="date-picker" className="text-Neutral-Dark px-1 hidden">
-        Date (à partir d&apos;aujourd&apos;hui)
-      </Label>
+      {label && (
+        <Label htmlFor="date-picker" className="text-Neutral-Dark px-1 font-normal text-[14px]/[20px]">
+          {label}{isRequired && <span className="text-red-500 ml-0.5">*</span>}
+        </Label>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

@@ -138,6 +138,13 @@ export default function NavigationButtons<
                 dateReceptionSouhaitee: d.dateReceptionSouhaitee || d.date || "",
                 creneauHoraire: d.creneauHoraire || "",
               }));
+              // Clear form persistence keys
+              ["auto","habitation","moto","sante","plaisance","accidents","voyage"].forEach((k) => {
+                sessionStorage.removeItem(`form_${k}_step`);
+                sessionStorage.removeItem(`form_${k}_data`);
+                sessionStorage.removeItem(`form_${k}_stepId`);
+                sessionStorage.removeItem(`form_${k}_history`);
+              });
             } catch {}
 
             showSuccess(

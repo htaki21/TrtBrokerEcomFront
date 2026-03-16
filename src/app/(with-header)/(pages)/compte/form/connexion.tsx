@@ -177,7 +177,16 @@ export default function ConnexionForm() {
         </div>
       </div>
       <div className="f-col gap-3 text-center">
-        {submitError && <p className="text-red-500">{submitError}</p>}
+        {submitError && (
+          <div className="text-red-500 f-col items-center gap-1">
+            <p>{submitError}</p>
+            {submitError.includes("confirmée") && (
+              <Link href="/compte/verification-en-attente" className="text-Brand-600 underline text-sm">
+                Renvoyer l&apos;email de confirmation
+              </Link>
+            )}
+          </div>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}

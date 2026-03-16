@@ -20,7 +20,9 @@ import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
   const { data, setData, clearFieldError } = useFormContext(); // ✅ safe, inside provider
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(() => {
+    try { const s = sessionStorage.getItem("form_habitation_step"); return s ? parseInt(s, 10) : 0; } catch { return 0; }
+  });
 
   const stepDataList = [
     step1Data,
@@ -62,6 +64,14 @@ export default function FormSteps() {
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();
   const draftId = searchParams.get("draftId");
+
+  useEffect(() => {
+    try { sessionStorage.setItem("form_habitation_step", String(currentStepIndex)); sessionStorage.setItem("form_habitation_data", JSON.stringify(data)); } catch {}
+  }, [currentStepIndex, data]);
+  useEffect(() => {
+    if (draftId) return;
+    try { const s = sessionStorage.getItem("form_habitation_data"); if (s) { const p = JSON.parse(s); if (p && typeof p === "object" && Object.keys(p).length > 1) setData(p); } } catch {}
+  }, []);
 
   // 1️⃣ Restore draft if URL contains draftId
   useEffect(() => {
