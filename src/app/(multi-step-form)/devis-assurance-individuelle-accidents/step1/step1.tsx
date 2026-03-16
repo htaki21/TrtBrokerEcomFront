@@ -36,7 +36,7 @@ export default function Step1({ goToNextStep }: { goToNextStep: () => void }) {
               className="max-mobile:py-3 font-medium"
               onClick={() => {
                 setData({ ...data, formuleAccidents: "Formule Basique" });
-                goToNextStep(); // new prop you pass from FormSteps
+                setTimeout(goToNextStep, 300);
               }}
             />
           </div>
@@ -74,7 +74,7 @@ export default function Step1({ goToNextStep }: { goToNextStep: () => void }) {
               className="max-mobile:py-3 font-medium"
               onClick={() => {
                 setData({ ...data, formuleAccidents: "Formule Confort" });
-                goToNextStep(); // new prop you pass from FormSteps
+                setTimeout(goToNextStep, 300);
               }}
             />
           </div>
@@ -105,7 +105,7 @@ export default function Step1({ goToNextStep }: { goToNextStep: () => void }) {
               className="max-mobile:py-3 font-medium"
               onClick={() => {
                 setData({ ...data, formuleAccidents: "Formule Premium" });
-                goToNextStep(); // new prop you pass from FormSteps
+                setTimeout(goToNextStep, 300);
               }}
             />
           </div>

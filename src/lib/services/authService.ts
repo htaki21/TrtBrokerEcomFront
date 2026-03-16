@@ -1,4 +1,7 @@
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || "http://localhost:1337";
+if (!process.env.NEXT_PUBLIC_STRAPI_API_URL && typeof window !== "undefined") {
+  console.warn("[TRT] NEXT_PUBLIC_STRAPI_API_URL is not set — using localhost:1337 fallback");
+}
 
 const errorMessages: Record<string, string> = {
   "Invalid identifier or password": "Email ou mot de passe incorrect",
@@ -16,6 +19,16 @@ function translateError(message: string, fallback: string): string {
   return errorMessages[message] || fallback;
 }
 
+export interface StrapiMedia {
+  id: number;
+  url: string;
+  formats?: {
+    thumbnail?: { url: string };
+    small?: { url: string };
+    medium?: { url: string };
+  };
+}
+
 export interface AuthUser {
   id: number;
   username: string;
@@ -26,6 +39,7 @@ export interface AuthUser {
   confirmed: boolean;
   blocked: boolean;
   createdAt: string;
+  photo?: StrapiMedia | null;
 }
 
 interface AuthResponse {
@@ -59,13 +73,19 @@ export async function loginUser(identifier: string, password: string): Promise<A
   return data as AuthResponse;
 }
 
+export interface RegisterResult {
+  needsEmailVerification: boolean;
+  auth?: AuthResponse;
+  email?: string;
+}
+
 export async function registerUser(params: {
   nom: string;
   email: string;
   password: string;
   telephone?: string;
   newsletter?: boolean;
-}): Promise<AuthResponse> {
+}): Promise<RegisterResult> {
   // Step 1: Register with standard Strapi fields only
   const res = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
     method: "POST",
@@ -84,37 +104,66 @@ export async function registerUser(params: {
     throw new Error(translateError(err.error?.message, "Erreur lors de l'inscription. Veuillez réessayer."));
   }
 
-  const authData = data as AuthResponse;
+  // When email confirmation is enabled, Strapi returns user but no JWT
+  const hasJwt = !!data.jwt;
+  const user = data.user;
 
-  // Merge registration params into user immediately so they're available in context
-  authData.user = {
-    ...authData.user,
-    nom: params.nom,
-    telephone: params.telephone || null,
-    newsletter: params.newsletter || false,
-  };
-
-  // Step 2: Persist custom fields to Strapi via custom endpoint
-  fetch(`${STRAPI_URL}/api/user-profile/me`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authData.jwt}`,
-    },
-    body: JSON.stringify({
+  if (hasJwt) {
+    // No email confirmation required — login immediately
+    const authData = data as AuthResponse;
+    authData.user = {
+      ...authData.user,
       nom: params.nom,
       telephone: params.telephone || null,
       newsletter: params.newsletter || false,
-    }),
-  }).catch(() => {
-    // Strapi update failed — data is still in local context
+    };
+
+    // Persist custom fields
+    fetch(`${STRAPI_URL}/api/user-profile/me`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authData.jwt}`,
+      },
+      body: JSON.stringify({
+        nom: params.nom,
+        telephone: params.telephone || null,
+        newsletter: params.newsletter || false,
+      }),
+    }).catch(() => {});
+
+    return { needsEmailVerification: false, auth: authData };
+  }
+
+  // Email confirmation required — persist custom fields via admin workaround
+  // Store custom fields in localStorage temporarily so they can be saved after confirmation
+  try {
+    localStorage.setItem("trt_pending_profile", JSON.stringify({
+      nom: params.nom,
+      telephone: params.telephone || null,
+      newsletter: params.newsletter || false,
+    }));
+  } catch {}
+
+  return { needsEmailVerification: true, email: params.email };
+}
+
+export async function resendConfirmationEmail(email: string): Promise<void> {
+  const res = await fetch(`${STRAPI_URL}/api/auth/send-email-confirmation`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
   });
 
-  return authData;
+  if (!res.ok) {
+    const data = await res.json();
+    const err = data as StrapiError;
+    throw new Error(translateError(err.error?.message, "Erreur lors de l'envoi de l'email de confirmation."));
+  }
 }
 
 export async function getMe(jwt: string): Promise<AuthUser> {
-  const res = await fetch(`${STRAPI_URL}/api/users/me`, {
+  const res = await fetch(`${STRAPI_URL}/api/users/me?populate=photo`, {
     headers: { Authorization: `Bearer ${jwt}` },
   });
 
@@ -138,6 +187,69 @@ export async function updateMe(jwt: string, data: Partial<Pick<AuthUser, "nom" |
   if (!res.ok) {
     const err = await res.json();
     throw new Error(translateError(err.error?.message, "Erreur lors de la mise à jour du profil."));
+  }
+
+  return res.json();
+}
+
+export async function uploadPhoto(jwt: string, file: File): Promise<AuthUser> {
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  const res = await fetch(`${STRAPI_URL}/api/user-profile/photo`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${jwt}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors du téléchargement de la photo.");
+  }
+
+  return res.json();
+}
+
+export async function deletePhoto(jwt: string): Promise<AuthUser> {
+  const res = await fetch(`${STRAPI_URL}/api/user-profile/photo`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors de la suppression de la photo.");
+  }
+
+  return res.json();
+}
+
+export interface UserLead {
+  id: number;
+  type: string;
+  status: string;
+  prenom: string;
+  nom: string;
+  createdAt: string;
+}
+
+export async function getMyLeads(jwt: string): Promise<UserLead[]> {
+  const res = await fetch(`${STRAPI_URL}/api/user-profile/my-leads`, {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors du chargement des demandes.");
+  }
+
+  return res.json();
+}
+
+export async function getLeadDetail(jwt: string, leadType: string, leadId: number): Promise<Record<string, unknown>> {
+  const res = await fetch(`${STRAPI_URL}/api/user-profile/lead/${leadType}/${leadId}`, {
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors du chargement des détails.");
   }
 
   return res.json();

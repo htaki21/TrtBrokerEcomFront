@@ -1,22 +1,49 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "trtbroker.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "backoffice.trtbroker.com",
-        port: "",
+// Build dynamic image domains from NEXT_PUBLIC_STRAPI_API_URL
+function getStrapiImagePatterns(): NextConfig["images"] {
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+  const patterns: { protocol: "http" | "https"; hostname: string; port: string; pathname: string }[] = [];
+
+  if (strapiUrl) {
+    try {
+      const url = new URL(strapiUrl);
+      patterns.push({
+        protocol: url.protocol.replace(":", "") as "http" | "https",
+        hostname: url.hostname,
+        port: url.port || "",
         pathname: "/uploads/**",
-      },
-    ],
-  },
+      });
+    } catch {}
+  }
+
+  // Always allow the main site domain
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    try {
+      const url = new URL(siteUrl);
+      patterns.push({
+        protocol: url.protocol.replace(":", "") as "http" | "https",
+        hostname: url.hostname,
+        port: url.port || "",
+        pathname: "/**",
+      });
+    } catch {}
+  }
+
+  // Fallback for local dev
+  if (patterns.length === 0) {
+    patterns.push(
+      { protocol: "http", hostname: "localhost", port: "1337", pathname: "/uploads/**" },
+      { protocol: "https", hostname: "backoffice.trtbroker.com", port: "", pathname: "/uploads/**" },
+    );
+  }
+
+  return { remotePatterns: patterns };
+}
+
+const nextConfig: NextConfig = {
+  images: getStrapiImagePatterns(),
   // Enable experimental features for better caching
   experimental: {
     staleTimes: {

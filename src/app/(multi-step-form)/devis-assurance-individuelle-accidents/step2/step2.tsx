@@ -1,12 +1,12 @@
-"use cleint";
+"use client";
 
 import { Checkbox } from "@heroui/checkbox";
 import { Calendar24 } from "../../components/date-picker-shadcn";
 import FormInput from "../../components/inputs/form-input";
 import { SelectScrollable } from "../../components/select-scroll";
+import UserInfoRecap from "../../components/UserInfoRecap";
 import { useFormContext } from "../context";
 import PaymentSelector from "@/app/components/PaymentSelector";
-import { useState } from "react";
 
 const formuleAccidents = [
   { value: "Formule Basique", label: "Formule Basique - 312,50 DH" },
@@ -26,9 +26,6 @@ const timeSlots = [
 ];
 
 export default function Step2() {
-  const [paymentMethod, setPaymentMethod] = useState<
-    "Paiement en agence" | "Virement bancaire"
-  >("Paiement en agence");
   const { data, setData } = useFormContext();
 
   const handleMarketingConsent = (checked: boolean) => {
@@ -72,45 +69,47 @@ export default function Step2() {
         </div>
       </div>
       <span className="Line"></span>
-      <div className="flex flex-col gap-4">
-        <h2 className="Button-M text-BG-Dark max-mobile:text-lg">
-          Coordonnées de contact
-        </h2>
-        <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
-          <FormInput
-            name="nom"
-            label="Nom"
-            placeholder="Ex : El Mehdi"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
-          <FormInput
-            name="prenom"
-            label="Prénom"
-            placeholder="Ex : Amine"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
+      <UserInfoRecap useFormContextHook={useFormContext}>
+        <div className="flex flex-col gap-4">
+          <h2 className="Button-M text-BG-Dark max-mobile:text-lg">
+            Coordonnées de contact
+          </h2>
+          <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
+            <FormInput
+              name="nom"
+              label="Nom"
+              placeholder="Ex : El Mehdi"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+            <FormInput
+              name="prenom"
+              label="Prénom"
+              placeholder="Ex : Amine"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+          </div>
+          <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
+            <FormInput
+              name="phone"
+              label="N° de téléphone"
+              placeholder="Ex : 06 12 34 56 78"
+              type="tel"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+            <FormInput
+              name="email"
+              label="Email (optionnel)"
+              placeholder="exemple@email.com"
+              useFormContextHook={useFormContext}
+              type="email"
+              isRequired={false}
+            />
+          </div>
         </div>
-        <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
-          <FormInput
-            name="phone"
-            label="N° de téléphone"
-            placeholder="Ex : 06 12 34 56 78"
-            type="tel"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
-          <FormInput
-            name="email"
-            label="Email (optionnel)"
-            placeholder="exemple@email.com"
-            useFormContextHook={useFormContext}
-            type="email"
-            isRequired={false}
-          />
-        </div>
-      </div>
+      </UserInfoRecap>
       {/* TEMPORARILY HIDDEN - Date and Time fields
       <span className="Line"></span>
       <div className="flex flex-col gap-4">
@@ -156,21 +155,24 @@ export default function Step2() {
           onValueChange={handleTermsAccepted}
           isRequired={true}
         >
-          J&apos;ai lu et j&apos;accepte les conditions générales
-          d&apos;utilisation, notamment la mention relative à la protection des
+          J&apos;ai lu et j&apos;accepte les{" "}
+          <a href="/conditions-generales-utilisation" target="_blank" className="underline text-Brand-500 hover:text-Brand-600" onClick={(e) => e.stopPropagation()}>conditions générales
+          d&apos;utilisation</a>, notamment la mention relative à la protection des
           données personnelles.
         </Checkbox>
       </div>
       <div className="f-col gap-4">
         <h2 className="Button-M">Mode de paiement</h2>
         <PaymentSelector
-          value={paymentMethod}
+          value={data.modePaiement || "Paiement en agence"}
           onChange={(id) =>
-            setPaymentMethod(
-              id === "Virement bancaire"
-                ? "Virement bancaire"
-                : "Paiement en agence",
-            )
+            setData((prev) => ({
+              ...prev,
+              modePaiement:
+                id === "Virement bancaire"
+                  ? "Virement bancaire"
+                  : "Paiement en agence",
+            }))
           }
         />
       </div>

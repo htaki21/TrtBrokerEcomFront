@@ -124,9 +124,9 @@ export function proxy(request: NextRequest) {
     // 6. Add CORS headers for API routes
     if (pathname.startsWith("/api/")) {
       const allowedOrigin =
-        process.env.NODE_ENV === "production"
-          ? (request.headers.get("origin") || "https://trtecomv2.deadlinemaroc.com")
-          : "http://localhost:3000";
+        request.headers.get("origin") ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.NODE_ENV === "production" ? "https://trtbroker.com" : "http://localhost:3000");
 
       response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
       response.headers.set(
@@ -143,9 +143,9 @@ export function proxy(request: NextRequest) {
     // 7. Handle preflight requests
     if (request.method === "OPTIONS") {
       const allowedOrigin =
-        process.env.NODE_ENV === "production"
-          ? (request.headers.get("origin") || "https://trtecomv2.deadlinemaroc.com")
-          : "http://localhost:3000";
+        request.headers.get("origin") ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.NODE_ENV === "production" ? "https://trtbroker.com" : "http://localhost:3000");
 
       return new NextResponse(null, {
         status: 200,

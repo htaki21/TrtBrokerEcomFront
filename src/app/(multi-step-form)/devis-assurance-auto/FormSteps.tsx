@@ -34,16 +34,6 @@ export default function FormSteps() {
     step7Data,
   ];
 
-  const steps = [
-    <Step1 key="step1" />,
-    <Step2 key="step2" />,
-    <Step3 key="step3" />,
-    <Step4 key="step4" />,
-    <Step5 key="step5" />,
-    <Step6 key="step6" />,
-    <Step7 key="step7" />,
-  ];
-
   // Define step indices
   const allStepIndices = stepDataList.map((_, i) => i);
 
@@ -55,6 +45,28 @@ export default function FormSteps() {
 
   const stepsCount = filteredStepIndices.length;
   const currentStepIndexFiltered = filteredStepIndices[currentStepIndex];
+
+  const handleNext = () => {
+    if (currentStepIndex + 1 < stepsCount) {
+      setCurrentStepIndex((i) => i + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex((i) => i - 1);
+    }
+  };
+
+  const steps = [
+    <Step1 key="step1" goToNextStep={handleNext} />,
+    <Step2 key="step2" />,
+    <Step3 key="step3" goToNextStep={handleNext} />,
+    <Step4 key="step4" />,
+    <Step5 key="step5" />,
+    <Step6 key="step6" goToNextStep={handleNext} />,
+    <Step7 key="step7" />,
+  ];
 
   const currentStep = stepDataList[currentStepIndexFiltered];
   const currentStepComponent = steps[currentStepIndexFiltered];
@@ -70,28 +82,12 @@ export default function FormSteps() {
         const uiStepIndex =
           typeof stepIndex === "string" ? parseInt(stepIndex, 10) : stepIndex;
         const actualStepIndex = filteredStepIndices[uiStepIndex];
-        const isValid = originalContext.isStepValid(actualStepIndex);
-        console.log(
-          `Validation: UI Step ${uiStepIndex} -> Actual Step ${actualStepIndex}, Valid: ${isValid}`,
-        );
-        return isValid;
+        return originalContext.isStepValid(actualStepIndex);
       },
     };
   };
 
   const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
-
-  const handleNext = () => {
-    if (currentStepIndex + 1 < stepsCount) {
-      setCurrentStepIndex((i) => i + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex((i) => i - 1);
-    }
-  };
 
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();

@@ -1,6 +1,7 @@
 "use client";
 
 import ButtonLink from "@/app/components/buttons/ButtonLink";
+import { generateRecapPdf } from "@/lib/utils/generateRecapPdf";
 import { generateVoyagePdf } from "@/lib/utils/generateVoyagePdf";
 import { SVGProps, useEffect, useState } from "react";
 
@@ -96,20 +97,26 @@ export function IconInfo(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-type VoyageFormData = {
-  assistanceVoyage: string;
-  primedelassistance: number;
-  dureedelacouverture: string;
-  transport: string;
-  situationfamiliale: string;
-  modePaiement: string;
+interface SuccessFormData {
+  productName: string;
   prenom: string;
   nom: string;
-  phone: string;
   email: string;
-  dureeVisa: string;
   reference?: string;
-};
+  phone?: string;
+  modePaiement?: string;
+  // Voyage-specific fields
+  assistanceVoyage?: string;
+  primedelassistance?: number;
+  dureedelacouverture?: string;
+  transport?: string;
+  situationfamiliale?: string;
+  dureeVisa?: string;
+  // Individuelle Accidents fields
+  formuleAccidents?: string;
+  dateReceptionSouhaitee?: string;
+  creneauHoraire?: string;
+}
 
 function generateReference(): string {
   const now = new Date();
@@ -121,36 +128,44 @@ function generateReference(): string {
 }
 
 export default function SuccessPage() {
-  const [formData, setFormData] = useState<VoyageFormData | null>(null);
+  const [formData, setFormData] = useState<SuccessFormData | null>(null);
   const [reference, setReference] = useState("");
+  const [isVoyage, setIsVoyage] = useState(false);
+  const [hasPayment, setHasPayment] = useState(false);
+
+  const PAYMENT_PRODUCTS = ["Assistance Voyage", "Individuelle Accidents"];
 
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem("voyageFormData");
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      // Try generic form data first (all forms)
+      const genericStored = sessionStorage.getItem("formSuccessData");
+      if (genericStored) {
+        const parsed = JSON.parse(genericStored);
         setFormData(parsed);
-        // Use the reference from the API (Strapi record ID), fallback to generated
         setReference(parsed.reference || generateReference());
-        sessionStorage.removeItem("voyageFormData");
-      } else {
-        setReference(generateReference());
+        if (parsed.productName === "Assistance Voyage") setIsVoyage(true);
+        if (PAYMENT_PRODUCTS.includes(parsed.productName)) setHasPayment(true);
+        sessionStorage.removeItem("formSuccessData");
+        return;
       }
+
+      // Fallback: try voyage-specific data (backward compat)
+      const voyageStored = sessionStorage.getItem("voyageFormData");
+      if (voyageStored) {
+        const parsed = JSON.parse(voyageStored);
+        setFormData({ ...parsed, productName: "Assistance Voyage" });
+        setReference(parsed.reference || generateReference());
+        setIsVoyage(true);
+        setHasPayment(true);
+        sessionStorage.removeItem("voyageFormData");
+        return;
+      }
+
+      setReference(generateReference());
     } catch {
       setReference(generateReference());
     }
   }, []);
-
-  // Build display label for assistance type
-  const getAssistanceLabel = (type: string) => {
-    switch (type) {
-      case "Schengen": return "Assistance Schengen";
-      case "Monde": return "Assistance Monde";
-      case "Étudiant": return "Assistance Étudiant";
-      case "Expatrié": return "Assistance Expatrié";
-      default: return type || "Assistance Voyage";
-    }
-  };
 
   return (
     <section className="relative pt-[200px] pb-11 px-4 w-full flex-center flex-col gap-6">
@@ -183,12 +198,17 @@ export default function SuccessPage() {
 
                 <span className="Text-M text-Sage-Gray-Higher">Produit</span>
                 <span className="button-s">
-                  {formData
-                    ? getAssistanceLabel(formData.assistanceVoyage)
-                    : "Assistance Voyage"}
+                  {formData?.productName || "Assurance"}
                 </span>
 
-                {formData?.dureedelacouverture && (
+                {formData?.nom && (
+                  <>
+                    <span className="Text-M text-Sage-Gray-Higher">Nom</span>
+                    <span className="button-s">{formData.prenom} {formData.nom}</span>
+                  </>
+                )}
+
+                {isVoyage && formData?.dureedelacouverture && (
                   <>
                     <span className="Text-M text-Sage-Gray-Higher">Durée</span>
                     <span className="button-s">
@@ -197,7 +217,7 @@ export default function SuccessPage() {
                   </>
                 )}
 
-                {formData?.transport && (
+                {isVoyage && formData?.transport && (
                   <>
                     <span className="Text-M text-Sage-Gray-Higher">
                       Option véhicule
@@ -206,7 +226,7 @@ export default function SuccessPage() {
                   </>
                 )}
 
-                {formData?.situationfamiliale && (
+                {isVoyage && formData?.situationfamiliale && (
                   <>
                     <span className="Text-M text-Sage-Gray-Higher">
                       Situation familiale
@@ -217,85 +237,95 @@ export default function SuccessPage() {
                   </>
                 )}
 
-                <span className="Text-M text-Sage-Gray-Higher">
-                  Mode de paiement
-                </span>
-                <span className="button-s">
-                  {formData?.modePaiement || "Paiement en agence"}
-                </span>
+                {hasPayment && (
+                  <>
+                    <span className="Text-M text-Sage-Gray-Higher">
+                      Mode de paiement
+                    </span>
+                    <span className="button-s">
+                      {formData?.modePaiement || "Paiement en agence"}
+                    </span>
+                  </>
+                )}
               </ul>
             </div>
-            <div className="f-col">
-              <span className="Text-M text-Sage-Gray-High">Montant</span>
-              <div className="flex gap-2 items-baseline">
-                <span className="Headings-H2">
-                  {formData?.primedelassistance || 350} DH
-                </span>
-                <span className="Text-M text-Sage-Gray-High">TTC</span>
+            {formData?.primedelassistance && (
+              <div className="f-col">
+                <span className="Text-M text-Sage-Gray-High">Montant</span>
+                <div className="flex gap-2 items-baseline">
+                  <span className="Headings-H2">
+                    {formData.primedelassistance} DH
+                  </span>
+                  <span className="Text-M text-Sage-Gray-High">TTC</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Paiement en agence section */}
-        <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-          <div className="p-5 rounded-2xl bg-white flex items-start justify-between gap-3 shadow-md max-mobile:flex-col">
-            <ul className="f-col gap-1">
-              <li className="f-col gap-3">
-                <span className="Headings-H5">Prochaine étape :</span>
-                <span className="Text-M text-Text-Body">
-                  Présentez-vous dans l&apos;une de nos agences avec votre
-                  référence :
-                </span>
-              </li>
-              <li className="f-col gap-3">
-                <span className="Headings-H5">{reference}</span>
-                <span className="Text-M text-Text-Body">
-                  Un conseiller finalisera votre contrat.
-                </span>
-              </li>
-            </ul>
-            <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower shrink-0">
-              <IconInfo className="shrink-0" />
-              <span className="button-s text-Sage-Gray-Higher">
-                Nos équipes sont disponibles du lundi au vendredi
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* Virement bancaire section */}
-        <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-          <div className="p-5 rounded-2xl bg-white flex justify-between gap-3 shadow-md max-mobile:flex-col">
-            <div className="f-col gap-3">
-              <span className="Headings-H5">Prochaine étape :</span>
-              <div className="f-col">
-                <span className="Text-M text-Text-Body">
-                  Les coordonnées bancaires vous ont été envoyées par email.
-                </span>
-                <span className="Text-M text-Text-Body">
-                  Merci d&apos;indiquer votre référence dans le motif :
-                </span>
-                <span className="Headings-H4 mt-1">{reference}</span>
+        {hasPayment && (
+          <>
+            {/* Paiement en agence section */}
+            <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
+              <div className="p-5 rounded-2xl bg-white flex items-start justify-between gap-3 shadow-md max-mobile:flex-col">
+                <ul className="f-col gap-1">
+                  <li className="f-col gap-3">
+                    <span className="Headings-H5">Prochaine étape :</span>
+                    <span className="Text-M text-Text-Body">
+                      Présentez-vous dans l&apos;une de nos agences avec votre
+                      référence :
+                    </span>
+                  </li>
+                  <li className="f-col gap-3">
+                    <span className="Headings-H5">{reference}</span>
+                    <span className="Text-M text-Text-Body">
+                      Un conseiller finalisera votre contrat.
+                    </span>
+                  </li>
+                </ul>
+                <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower shrink-0">
+                  <IconInfo className="shrink-0" />
+                  <span className="button-s text-Sage-Gray-Higher">
+                    Nos équipes sont disponibles du lundi au vendredi
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="f-col items-end justify-between shrink-0 max-mobile:items-start max-mobile:gap-3">
-              <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
-                <IconInfo className="shrink-0" />
-                <span className="button-s text-Sage-Gray-Higher">
-                  Vérifiez votre boîte de réception (et les spams)
-                </span>
+            {/* Virement bancaire section */}
+            <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
+              <div className="p-5 rounded-2xl bg-white flex justify-between gap-3 shadow-md max-mobile:flex-col">
+                <div className="f-col gap-3">
+                  <span className="Headings-H5">Prochaine étape :</span>
+                  <div className="f-col">
+                    <span className="Text-M text-Text-Body">
+                      Les coordonnées bancaires vous ont été envoyées par email.
+                    </span>
+                    <span className="Text-M text-Text-Body">
+                      Merci d&apos;indiquer votre référence dans le motif :
+                    </span>
+                    <span className="Headings-H4 mt-1">{reference}</span>
+                  </div>
+                </div>
+                <div className="f-col items-end justify-between shrink-0 max-mobile:items-start max-mobile:gap-3">
+                  <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
+                    <IconInfo className="shrink-0" />
+                    <span className="button-s text-Sage-Gray-Higher">
+                      Vérifiez votre boîte de réception (et les spams)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 py-2 px-4 rounded-full bg-Sage-Gray-Lower
+              transition hover:bg-Sage-Gray-Low cursor-pointer button-s"
+                  >
+                    <span>Renvoyer l&apos;email</span>
+                    <IconRefresh className="shrink-0" />
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                className="flex items-center gap-1 py-2 px-4 rounded-full bg-Sage-Gray-Lower
-          transition hover:bg-Sage-Gray-Low cursor-pointer button-s"
-              >
-                <span>Renvoyer l&apos;email</span>
-                <IconRefresh className="shrink-0" />
-              </button>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
       <div className="flex max-mobile:flex-col gap-3">
         <ButtonLink
@@ -308,22 +338,34 @@ export default function SuccessPage() {
           reverse
           direction="left"
         />
-        <button
-          type="button"
-          onClick={() => {
-            if (formData && reference) {
-              generateVoyagePdf({ ...formData, reference });
-            }
-          }}
-          disabled={!formData || !reference}
-          className={`flex items-center gap-2 py-3 px-5 rounded-full bg-Sage-Gray-Lower
-          transition hover:bg-Sage-Gray-Low cursor-pointer Button-M ${
-            !formData || !reference ? "opacity-50 pointer-events-none" : ""
-          }`}
-        >
-          <IconDownload className="shrink-0" />
-          <span>Télécharger le récapitulatif (PDF)</span>
-        </button>
+        {hasPayment && formData && reference && (
+          <button
+            type="button"
+            onClick={() => {
+              if (isVoyage) {
+                generateVoyagePdf({ ...formData, reference } as Parameters<typeof generateVoyagePdf>[0]);
+              } else {
+                generateRecapPdf({
+                  reference,
+                  productName: formData.productName,
+                  prenom: formData.prenom,
+                  nom: formData.nom,
+                  phone: formData.phone,
+                  email: formData.email,
+                  modePaiement: formData.modePaiement,
+                  formuleAccidents: formData.formuleAccidents,
+                  dateReceptionSouhaitee: formData.dateReceptionSouhaitee,
+                  creneauHoraire: formData.creneauHoraire,
+                });
+              }
+            }}
+            className="flex items-center gap-2 py-3 px-5 rounded-full bg-Sage-Gray-Lower
+            transition hover:bg-Sage-Gray-Low cursor-pointer Button-M"
+          >
+            <IconDownload className="shrink-0" />
+            <span>Télécharger le récapitulatif (PDF)</span>
+          </button>
+        )}
       </div>
     </section>
   );

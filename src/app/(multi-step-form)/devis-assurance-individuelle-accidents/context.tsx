@@ -16,6 +16,7 @@ export type FormData = {
   phone: string;
   date: string;
   creneauHoraire: string;
+  modePaiement: string;
   marketingConsent: boolean;
   termsAccepted: boolean;
 };
@@ -47,8 +48,9 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     phone: "",
     date: "",
     creneauHoraire: "",
+    modePaiement: "Paiement en agence",
     marketingConsent: false,
-    termsAccepted: false,
+    termsAccepted: true,
   });
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});

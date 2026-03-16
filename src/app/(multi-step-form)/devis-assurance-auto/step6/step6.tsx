@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Card from "../../components/cards/card";
 import { useFormContext } from "../context";
 
-export default function Step6() {
+export default function Step6({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   // Auto-set age for new cars, but still show the step for confirmation
@@ -16,6 +16,7 @@ export default function Step6() {
 
   const handleSelect = (type: "Moins de 5 ans" | "Plus de 5 ans") => {
     setData((prev) => ({ ...prev, ageDeVoiture: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

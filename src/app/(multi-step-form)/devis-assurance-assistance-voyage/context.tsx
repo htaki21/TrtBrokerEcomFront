@@ -61,7 +61,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     date: "",
     creneauHoraire: "",
     marketingConsent: false,
-    termsAccepted: false,
+    termsAccepted: true,
     modePaiement: "Paiement en agence",
   });
 

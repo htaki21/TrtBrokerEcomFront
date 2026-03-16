@@ -69,9 +69,10 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
   const saveAndExit = () => {
     if (!registeredData) return;
     const id = draftId ?? crypto.randomUUID();
+    const existing = drafts.find((d) => d.id === id);
     const draft: Draft = {
       id,
-      reference: "TRT-" + Math.floor(Math.random() * 99999),
+      reference: existing?.reference || "TRT-" + Math.floor(Math.random() * 99999),
       status: "EN_COURS",
       updatedAt: new Date().toISOString(),
       ...registeredData,
@@ -84,19 +85,16 @@ export function DraftProvider({ children }: { children: React.ReactNode }) {
   };
 
   const completeDraft = () => {
-    if (!registeredData) return;
-    const id = draftId ?? crypto.randomUUID();
-    const draft: Draft = {
-      id,
-      reference: "TRT-" + Math.floor(Math.random() * 99999),
-      status: "VALIDE",
-      updatedAt: new Date().toISOString(),
-      ...registeredData,
-    };
-    saveOrUpdateDraft(draft);
+    // When form is submitted, remove the draft — the lead is now in "Mes contrats"
+    if (draftId) {
+      const updated = drafts.filter((d) => d.id !== draftId);
+      try {
+        localStorage.setItem("drafts", JSON.stringify(updated));
+      } catch {}
+      setDrafts(updated);
+    }
     setDraftId(null);
     setRegisteredData(null);
-    setDrafts(getDrafts());
   };
 
   const deleteDraft = (id: string) => {

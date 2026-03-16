@@ -7,13 +7,14 @@ import { SchengenIcon } from "../../components/icons/Schengen";
 import { ÉtudiantIcon } from "../../components/icons/Étudiant";
 import { useFormContext } from "../context";
 
-export default function Step2() {
+export default function Step2({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (
     type: "Schengen" | "Monde" | "Étudiant" | "Expatrié"
   ) => {
     setData((prev) => ({ ...prev, assistanceVoyage: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

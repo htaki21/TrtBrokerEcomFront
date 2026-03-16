@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SVGProps, useState } from "react";
+import { SVGProps, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import InfoPersonnellesForm from "./form/Info-personnelles";
 import { IconSearch } from "@/app/components/header/components/head-desktop";
@@ -11,6 +11,10 @@ import PopupSupprimerCompte from "@/app/components/popup/PopupSupprimerCompte";
 import { usePopup } from "@/app/components/popup/PopupContext";
 import AuthGuard from "@/app/components/auth/AuthGuard";
 import { useAuth } from "@/app/components/auth/AuthContext";
+import toast from "react-hot-toast";
+import { UserLead, getMyLeads, getLeadDetail } from "@/lib/services/authService";
+import { generateRecapPdf } from "@/lib/utils/generateRecapPdf";
+import { generateVoyagePdf } from "@/lib/utils/generateVoyagePdf";
 
 export function IconProfile(props: SVGProps<SVGSVGElement>) {
   return (
@@ -198,13 +202,29 @@ export function IconDownload(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || "http://localhost:1337";
+
 export default function ComptePage() {
   const { open } = usePopup();
-  const { user, logout } = useAuth();
+  const { user, jwt, logout, updatePhoto, removePhoto } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [value, setValue] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [leads, setLeads] = useState<UserLead[]>([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const clear = () => setValue("");
+
+  useEffect(() => {
+    if (activeTab === 1 && jwt && leads.length === 0) {
+      setLeadsLoading(true);
+      getMyLeads(jwt)
+        .then(setLeads)
+        .catch((err) => console.error("Failed to load leads:", err))
+        .finally(() => setLeadsLoading(false));
+    }
+  }, [activeTab, jwt]);
 
   const tabs = ["Informations personnelles", "Mes contrats"];
 
@@ -213,16 +233,180 @@ export default function ComptePage() {
     router.push("/compte/connexion");
   };
 
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo.");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      await updatePhoto(file);
+      toast.success("Photo de profil mise à jour.");
+    } catch {
+      toast.error("Erreur lors du téléchargement de la photo.");
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setUploadingPhoto(true);
+    try {
+      await removePhoto();
+      toast.success("Photo de profil supprimée.");
+    } catch {
+      toast.error("Erreur lors de la suppression de la photo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const DOWNLOAD_TYPES = ["Assistance Voyage", "Individuelle Accidents"];
+
+  const handleDownloadLead = async (lead: UserLead, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!DOWNLOAD_TYPES.includes(lead.type) || !jwt) return;
+
+    try {
+      if (lead.type === "Assistance Voyage") {
+        const detail = await getLeadDetail(jwt, "assistance-voyage", lead.id);
+        const modeMap: Record<string, string> = {
+          paiement_en_agence: "Paiement en agence",
+          virement_bancaire: "Virement bancaire",
+        };
+        const typeMap: Record<string, string> = {
+          schengen: "Schengen",
+          monde: "Monde",
+          etudiant: "Étudiant",
+          expatrie: "Expatrié",
+        };
+        const durationMap: Record<string, string> = {
+          six_mois: "6 mois",
+          plus_six_mois: "Plus de 6 mois",
+          un_an: "1 an",
+        };
+        await generateVoyagePdf({
+          reference: `TRT-${detail.id}`,
+          assistanceVoyage: typeMap[detail.typeAssistance as string] || (detail.typeAssistance as string) || "",
+          primedelassistance: (detail.primeAssistance as number) || 350,
+          dureedelacouverture: durationMap[detail.dureeSchengen as string] || durationMap[detail.dureeMonde as string] || "",
+          transport: detail.vehiculePersonnel ? "Oui" : "Non",
+          situationfamiliale: (detail.typeCouverture as string) || "",
+          modePaiement: modeMap[detail.modePaiement as string] || "Paiement en agence",
+          prenom: (detail.prenom as string) || "",
+          nom: (detail.nom as string) || "",
+          phone: (detail.telephone as string) || "",
+          email: (detail.email as string) || "",
+          dureeVisa: durationMap[detail.dureeVisa as string] || "",
+        });
+      } else if (lead.type === "Individuelle Accidents") {
+        const detail = await getLeadDetail(jwt, "individuelle-accidents", lead.id);
+        const formuleMap: Record<string, string> = {
+          formule_basique_312_50: "Formule Basique",
+          formule_confort_427_50: "Formule Confort",
+          formule_premium_738_00: "Formule Premium",
+        };
+        await generateRecapPdf({
+          reference: `TRT-${detail.id}`,
+          productName: "Individuelle Accidents",
+          prenom: (detail.prenom as string) || "",
+          nom: (detail.nom as string) || "",
+          phone: (detail.telephone as string) || "",
+          email: (detail.email as string) || "",
+          modePaiement: "Paiement en agence",
+          formuleAccidents: formuleMap[detail.formuleAssurance as string] || (detail.formuleDisplay as string) || "",
+          prixFormule: (detail.prixFormule as number) || undefined,
+          dateReceptionSouhaitee: (detail.datePreference as string) || "",
+          creneauHoraire: (detail.creneauHoraire as string) || "",
+        });
+      }
+    } catch {
+      toast.error("Erreur lors du téléchargement du PDF.");
+    }
+  };
+
+  const filteredLeads = value
+    ? leads.filter((l) =>
+        l.type.toLowerCase().includes(value.toLowerCase()) ||
+        l.status.toLowerCase().includes(value.toLowerCase())
+      )
+    : leads;
+
   const displayName = user?.nom || user?.username || "Utilisateur";
   const displayEmail = user?.email || "";
+  const photoUrl = user?.photo?.url
+    ? user.photo.url.startsWith("http")
+      ? user.photo.url
+      : `${STRAPI_URL}${user.photo.url}`
+    : null;
 
   return (
     <AuthGuard>
     <main className="relative w-full max-w-[780px] mx-auto f-col gap-6 pt-[38px] pb[64px] px-4">
       <div className="flex items-center gap-4">
-        <span className="p-2 flex-center size-[108px] rounded-full overflow-hidden bg-[#E2EFCE]">
-          <IconProfile className=" shrink-0" />
-        </span>
+        <div className="relative group">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+          <button
+            type="button"
+            onClick={handlePhotoClick}
+            disabled={uploadingPhoto}
+            className="relative p-2 flex-center size-[108px] rounded-full overflow-hidden bg-[#E2EFCE] cursor-pointer transition hover:opacity-90"
+          >
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="Photo de profil"
+                className="size-full object-cover rounded-full"
+              />
+            ) : (
+              <IconProfile className="shrink-0" />
+            )}
+            {uploadingPhoto ? (
+              <span className="absolute inset-0 flex-center bg-black/40 rounded-full">
+                <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </span>
+            ) : (
+              <span className="absolute inset-0 flex-center bg-black/0 group-hover:bg-black/30 rounded-full transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="opacity-0 group-hover:opacity-100 transition">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx={12} cy={13} r={4} />
+                </svg>
+              </span>
+            )}
+          </button>
+          {photoUrl && !uploadingPhoto && (
+            <button
+              type="button"
+              onClick={handleRemovePhoto}
+              className="absolute -top-1 -right-1 size-6 flex-center bg-Secondary-Red-Medium text-white rounded-full
+                opacity-0 group-hover:opacity-100 transition cursor-pointer hover:bg-Secondary-Red-Higher"
+              title="Supprimer la photo"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="f-col gap-1 flex-1">
           <h4 className="Headings-H4">{displayName}</h4>
           <p className="text-Sage-Gray-Higher Text-M">{displayEmail}</p>
@@ -282,7 +466,7 @@ export default function ComptePage() {
         )}
         {activeTab === 1 && (
           <div className="f-col gap-4">
-            <h4 className="Headings-H4">Mes contrats d'assurance</h4>
+            <h4 className="Headings-H4">Mes demandes de devis</h4>
             <label
               className="py-3 px-4 bg-Sage-Gray-Lower hover:bg-Sage-Gray-Low text-Neutral-BG-5
                focus-within:text-Neutral-Dark transition flex items-center gap-2 rounded-full focus-within:hover:bg-Sage-Gray-Lowest
@@ -309,84 +493,78 @@ export default function ComptePage() {
             <div className="f-col gap-1 p-2 rounded-3xl bg-Sage-Gray-Lower button2-s">
               <ul className="flex">
                 <li className="py-3 px-5 flex-1">Type</li>
-                <li className="py-3 px-5 flex-1">Assureur</li>
-                <li className="py-3 px-5 flex-1">Échéance </li>
-                <li className="py-3 px-5 flex-1">Prime</li>
+                <li className="py-3 px-5 flex-1">Nom</li>
+                <li className="py-3 px-5 flex-1">Date</li>
+                <li className="py-3 px-5 flex-1">Statut</li>
                 <li className="w-[60px]"></li>
               </ul>
-              <ul className="f-col gap-1 rounded-2xl overflow-hidden">
-                <li
-                  onClick={() => open("PopupCompteAssurance")}
-                  className="grid grid-cols-[repeat(4,minmax(0,1fr))_fit-content(100%)] transition cursor-pointer bg-white hover:bg-Sage-Gray-Lowest"
-                >
-                  <div className="py-4 px-5 f-col gap-1">
-                    <div className="flex items-center gap-0.5">
-                      <IconFile />
-                      <span className="button-s line-clamp-1">
-                        Assurance Auto
+              {leadsLoading ? (
+                <div className="flex-center py-12">
+                  <span className="w-6 h-6 border-2 border-Neutral-Dark border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : filteredLeads.length === 0 ? (
+                <div className="flex-center py-12 rounded-2xl bg-white">
+                  <p className="text-Sage-Gray-Higher">
+                    {value ? "Aucun résultat trouvé." : "Aucune demande de devis pour le moment."}
+                  </p>
+                </div>
+              ) : (
+                <ul className="f-col gap-1 rounded-2xl overflow-hidden">
+                  {filteredLeads.map((lead) => (
+                    <li
+                      key={`${lead.type}-${lead.id}`}
+                      onClick={() => open("PopupCompteAssurance", lead)}
+                      className="grid grid-cols-[repeat(4,minmax(0,1fr))_fit-content(100%)] transition cursor-pointer bg-white hover:bg-Sage-Gray-Lowest"
+                    >
+                      <div className="py-4 px-5 f-col gap-1">
+                        <div className="flex items-center gap-0.5">
+                          <IconFile />
+                          <span className="button-s line-clamp-1">
+                            {lead.type}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="my-auto px-5">{lead.prenom} {lead.nom}</span>
+                      <span className="my-auto px-5">
+                        {lead.createdAt
+                          ? new Date(lead.createdAt).toLocaleDateString("fr-FR")
+                          : "—"}
                       </span>
-                    </div>
-                    <span className="text-Sage-Gray-Higher">MA-2024-8763</span>
-                  </div>
-                  <span className="my-auto px-5">Saham Assurance</span>
-                  <span className="my-auto px-5">14/01/2025</span>
-                  <span className="my-auto px-5 button-s">350 DH/mois</span>
-                  <div className="my-auto px-3 w-auto">
-                    <span className="p-2 flex-center bg-Sage-Gray-Lower rounded-full">
-                      <IconDownload className=" shrink-0" />
-                    </span>
-                  </div>
-                </li>
-                <li
-                  onClick={() => open("PopupCompteAssurance")}
-                  className="grid grid-cols-[repeat(4,minmax(0,1fr))_fit-content(100%)] transition cursor-pointer bg-white hover:bg-Sage-Gray-Lowest"
-                >
-                  <div className="py-4 px-5 f-col gap-1">
-                    <div className="flex items-center gap-0.5">
-                      <IconFile />
-                      <span className="button-s line-clamp-1">
-                        Assurance Auto
+                      <span className="my-auto px-5">
+                        <span className={`py-1 px-3 rounded-full text-[12px] font-medium ${
+                          lead.status === "Validé" || lead.status === "VALIDE"
+                            ? "bg-green-100 text-green-700"
+                            : lead.status === "Refusé"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}>
+                          {lead.status}
+                        </span>
                       </span>
-                    </div>
-                    <span className="text-Sage-Gray-Higher">MA-2024-8763</span>
-                  </div>
-                  <span className="my-auto px-5">Saham Assurance</span>
-                  <span className="my-auto px-5">14/01/2025</span>
-                  <span className="my-auto px-5 button-s">350 DH/mois</span>
-                  <div className="my-auto px-3 w-auto">
-                    <span className="p-2 flex-center bg-Sage-Gray-Lower rounded-full">
-                      <IconDownload className=" shrink-0" />
-                    </span>
-                  </div>
-                </li>
-                <li
-                  onClick={() => open("PopupCompteAssurance")}
-                  className="grid grid-cols-[repeat(4,minmax(0,1fr))_fit-content(100%)] transition cursor-pointer bg-white hover:bg-Sage-Gray-Lowest"
-                >
-                  <div className="py-4 px-5 f-col gap-1">
-                    <div className="flex items-center gap-0.5">
-                      <IconFile />
-                      <span className="button-s line-clamp-1">
-                        Assurance Auto
-                      </span>
-                    </div>
-                    <span className="text-Sage-Gray-Higher">MA-2024-8763</span>
-                  </div>
-                  <span className="my-auto px-5">Saham Assurance</span>
-                  <span className="my-auto px-5">14/01/2025</span>
-                  <span className="my-auto px-5 button-s">350 DH/mois</span>
-                  <div className="my-auto px-3 w-auto">
-                    <span className="p-2 flex-center bg-Sage-Gray-Lower rounded-full">
-                      <IconDownload className=" shrink-0" />
-                    </span>
-                  </div>
-                </li>
-              </ul>
+                      <div className="my-auto px-3 w-auto">
+                        {DOWNLOAD_TYPES.includes(lead.type) ? (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDownloadLead(lead, e)}
+                            className="p-2 flex-center bg-Sage-Gray-Lower rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer"
+                          >
+                            <IconDownload className=" shrink-0" />
+                          </button>
+                        ) : (
+                          <span className="p-2 flex-center bg-Sage-Gray-Lower rounded-full opacity-30">
+                            <IconDownload className=" shrink-0" />
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <PopupCompteAssurance />
           </div>
         )}
       </div>
+      <PopupCompteAssurance />
       <PopupSupprimerCompte />
     </main>
     </AuthGuard>

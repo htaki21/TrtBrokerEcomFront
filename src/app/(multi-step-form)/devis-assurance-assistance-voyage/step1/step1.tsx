@@ -1,11 +1,12 @@
 import { useFormContext } from "../context";
 import Card from "../../components/cards/card";
 
-export default function Step1() {
+export default function Step1({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (type: "6 mois" | "Plus de 6 mois") => {
     setData((prev) => ({ ...prev, dureeVisa: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

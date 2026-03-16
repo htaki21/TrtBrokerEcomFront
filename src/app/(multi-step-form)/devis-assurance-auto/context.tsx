@@ -59,7 +59,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     selectedDate: "",
     selectedTime: "",
     marketingConsent: false,
-    termsAccepted: false,
+    termsAccepted: true,
     // Additional fields for Strapi compatibility
     datePreference: "",
     creneauHoraire: "",

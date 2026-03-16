@@ -30,31 +30,41 @@ const KEY = "drafts";
 
 export const getDrafts = (): Draft[] => {
   if (typeof window === "undefined") return [];
-  return JSON.parse(localStorage.getItem(KEY) || "[]");
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || "[]");
+  } catch {
+    return [];
+  }
 };
 
 export const saveOrUpdateDraft = (draft: Draft) => {
-  const drafts = getDrafts();
-  const exists = drafts.find((d) => d.id === draft.id);
+  try {
+    const drafts = getDrafts();
+    const exists = drafts.find((d) => d.id === draft.id);
 
-  const updated = exists
-    ? drafts.map((d) => (d.id === draft.id ? draft : d))
-    : [...drafts, draft];
+    const updated = exists
+      ? drafts.map((d) => (d.id === draft.id ? draft : d))
+      : [...drafts, draft];
 
-  localStorage.setItem(KEY, JSON.stringify(updated));
+    localStorage.setItem(KEY, JSON.stringify(updated));
+  } catch {}
 };
 
 export const validateDraft = (id: string) => {
-  const drafts = getDrafts().map((d) =>
-    d.id === id
-      ? { ...d, status: "VALIDE", updatedAt: new Date().toISOString() }
-      : d,
-  );
+  try {
+    const drafts = getDrafts().map((d) =>
+      d.id === id
+        ? { ...d, status: "VALIDE", updatedAt: new Date().toISOString() }
+        : d,
+    );
 
-  localStorage.setItem(KEY, JSON.stringify(drafts));
+    localStorage.setItem(KEY, JSON.stringify(drafts));
+  } catch {}
 };
 
 export const deleteDraft = (id: string) => {
-  const drafts = getDrafts().filter((d) => d.id !== id);
-  localStorage.setItem(KEY, JSON.stringify(drafts));
+  try {
+    const drafts = getDrafts().filter((d) => d.id !== id);
+    localStorage.setItem(KEY, JSON.stringify(drafts));
+  } catch {}
 };

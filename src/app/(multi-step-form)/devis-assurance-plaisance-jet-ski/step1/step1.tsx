@@ -5,13 +5,14 @@ import { DePlaisanceIcon } from "../../components/icons/DePlaisance";
 import { JetSkiIcon } from "../../components/icons/Jet-Ski";
 import { AVoileIcon } from "../../components/icons/ÀVoile";
 
-export default function Step1() {
+export default function Step1({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (
     type: "De Plaisance" | "À Moteur" | "À Voile" | "Jet-Ski"
   ) => {
     setData((prev) => ({ ...prev, typeDeBateau: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

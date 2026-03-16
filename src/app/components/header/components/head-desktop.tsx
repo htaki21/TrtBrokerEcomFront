@@ -128,7 +128,7 @@ const HeaderDesktop = ({ onMobileMenuToggle }: HeaderDesktopProps) => {
   };
 
   const { drafts } = useDraft();
-  const draftCount = drafts.length;
+  const draftCount = drafts.filter((d) => d.status === "EN_COURS").length;
   const { user } = useAuth();
 
   return (

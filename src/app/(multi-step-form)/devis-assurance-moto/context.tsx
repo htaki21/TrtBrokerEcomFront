@@ -50,7 +50,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     Date: "",
     Créneauhoraire: "",
     marketingConsent: false,
-    termsAccepted: false,
+    termsAccepted: true,
   });
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});

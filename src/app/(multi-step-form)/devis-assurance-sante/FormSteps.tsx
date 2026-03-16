@@ -18,17 +18,7 @@ export default function FormSteps() {
 
   const stepDataList = [step1Data, step2Data, step3Data];
 
-  const steps = [
-    <Step1 key="step1" />,
-    <Step2 key="step2" />,
-    <Step3 key="step3" />,
-  ];
-
-  const stepsCount = steps.length;
-  const currentStep = stepDataList[currentStepIndex];
-  const currentStepComponent = steps[currentStepIndex];
-
-  const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
+  const stepsCount = stepDataList.length;
 
   const handleNext = () => {
     if (currentStepIndex + 1 < stepsCount) {
@@ -41,6 +31,17 @@ export default function FormSteps() {
       setCurrentStepIndex((i) => i - 1);
     }
   };
+
+  const steps = [
+    <Step1 key="step1" goToNextStep={handleNext} />,
+    <Step2 key="step2" />,
+    <Step3 key="step3" />,
+  ];
+
+  const currentStep = stepDataList[currentStepIndex];
+  const currentStepComponent = steps[currentStepIndex];
+
+  const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
 
   const { drafts, loadDraft, registerDraftData, setDraftId } = useDraft();
   const searchParams = useSearchParams();

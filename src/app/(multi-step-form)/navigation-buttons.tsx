@@ -40,6 +40,7 @@ export default function NavigationButtons<
   const {
     isStepValid,
     isFormValid,
+    data,
     submitForm,
     isSubmitting: contextIsSubmitting,
   } = useFormContextHook();
@@ -62,6 +63,24 @@ export default function NavigationButtons<
 
   // Use context isSubmitting if available, otherwise use local state
   const isSubmitting = contextIsSubmitting ?? localIsSubmitting;
+
+  // Map URL path to product name
+  const getProductName = useCallback(() => {
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    if (path.includes("assurance-auto")) return "Assurance Auto";
+    if (path.includes("assurance-habitation")) return "Assurance Habitation";
+    if (path.includes("assurance-moto")) return "Assurance Moto";
+    if (path.includes("assurance-sante")) return "Assurance Santé";
+    if (path.includes("assurance-entreprise")) return "Assurance Entreprise";
+    if (path.includes("assurance-professionnelle")) return "Assurance Professionnelle";
+    if (path.includes("individuelle-accidents")) return "Individuelle Accidents";
+    if (path.includes("maladie-complementaire")) return "Maladie Complémentaire";
+    if (path.includes("carte-verte-auto")) return "Carte Verte Auto";
+    if (path.includes("carte-verte-voyage")) return "Carte Verte Voyage";
+    if (path.includes("plaisance") || path.includes("jet-ski")) return "Plaisance / Jet-ski";
+    if (path.includes("assistance-voyage")) return "Assistance Voyage";
+    return "Assurance";
+  }, []);
 
   // Get the success page path based on current form
   const getSuccessPagePath = useCallback(() => {
@@ -103,6 +122,24 @@ export default function NavigationButtons<
             // 🔹 Mark draft as VALIDE
             completeDraft();
 
+            // Save form data for success page
+            try {
+              const d = data as Record<string, unknown>;
+              sessionStorage.setItem("formSuccessData", JSON.stringify({
+                productName: getProductName(),
+                prenom: d.prenom || "",
+                nom: d.nom || "",
+                email: d.email || "",
+                phone: d.phone || d.telephone || "",
+                reference: (result as Record<string, unknown>).reference || "",
+                modePaiement: d.modePaiement || "",
+                // Extra fields for rich PDF
+                formuleAccidents: d.formuleAccidents || "",
+                dateReceptionSouhaitee: d.dateReceptionSouhaitee || d.date || "",
+                creneauHoraire: d.creneauHoraire || "",
+              }));
+            } catch {}
+
             showSuccess(
               result.message ||
                 "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais.",
@@ -130,6 +167,23 @@ export default function NavigationButtons<
         // 🔹 Mark draft as VALIDE even for fallback forms
         completeDraft();
 
+        // Save form data for success page
+        try {
+          const d = data as Record<string, unknown>;
+          sessionStorage.setItem("formSuccessData", JSON.stringify({
+            productName: getProductName(),
+            prenom: d.prenom || "",
+            nom: d.nom || "",
+            email: d.email || "",
+            phone: d.phone || d.telephone || "",
+            modePaiement: d.modePaiement || "",
+            // Extra fields for rich PDF
+            formuleAccidents: d.formuleAccidents || "",
+            dateReceptionSouhaitee: d.dateReceptionSouhaitee || d.date || "",
+            creneauHoraire: d.creneauHoraire || "",
+          }));
+        } catch {}
+
         showSuccess(
           "Votre demande a été transmise avec succès. Notre équipe vous contactera dans les plus brefs délais.",
         );
@@ -148,7 +202,7 @@ export default function NavigationButtons<
         setLocalIsSubmitting(false);
       }
     }
-  }, [isFormValid, submitForm, router, getSuccessPagePath, completeDraft]);
+  }, [isFormValid, submitForm, data, router, getSuccessPagePath, getProductName, completeDraft]);
 
   // Helper function to check if we're on a final step
   const isFinalStep = (stepId: string | undefined): boolean => {

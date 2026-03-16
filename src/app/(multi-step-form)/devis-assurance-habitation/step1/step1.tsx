@@ -4,11 +4,12 @@ import { AppartementIcon } from "../../components/icons/Appartement";
 import { MaisonIcon } from "../../components/icons/Maison";
 import { VillaIcon } from "../../components/icons/Villa";
 
-export default function Step1() {
+export default function Step1({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (type: "Appartement" | "Maison" | "Villa") => {
     setData((prev) => ({ ...prev, typeHabitation: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

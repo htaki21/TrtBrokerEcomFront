@@ -745,20 +745,22 @@ export function getSecurityHeaders(): Record<string, string> {
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 
     // Enhanced Content Security Policy for enterprise
-    "Content-Security-Policy": [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' http://localhost:1337 https://trtecomadminv2.deadlinemaroc.com",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'",
-      "upgrade-insecure-requests",
-    ].join("; "),
+    "Content-Security-Policy": (() => {
+      const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || "";
+      return [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://static.cloudflareinsights.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        `img-src 'self' data: https: ${strapiUrl} blob:`,
+        "font-src 'self' data: https://fonts.gstatic.com",
+        `connect-src 'self' ${strapiUrl}`,
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+      ].join("; ");
+    })(),
 
     // Privacy and tracking protection
     "Permissions-Policy": [
@@ -775,9 +777,9 @@ export function getSecurityHeaders(): Record<string, string> {
 
     // Additional enterprise security headers
     "X-Permitted-Cross-Domain-Policies": "none",
-    "Cross-Origin-Embedder-Policy": "require-corp",
+    "Cross-Origin-Embedder-Policy": "unsafe-none",
     "Cross-Origin-Opener-Policy": "same-origin",
-    "Cross-Origin-Resource-Policy": "same-origin",
+    "Cross-Origin-Resource-Policy": "cross-origin",
 
     // Custom headers for monitoring
     "X-Security-Level": "enterprise",

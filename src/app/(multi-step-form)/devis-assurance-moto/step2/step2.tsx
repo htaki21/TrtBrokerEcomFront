@@ -5,7 +5,7 @@ import { Moto3Icon } from "../../components/icons/moto-3";
 import { Moto4Icon } from "../../components/icons/moto-4";
 import { useFormContext } from "../context";
 
-export default function Step2() {
+export default function Step2({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (
@@ -16,6 +16,7 @@ export default function Step2() {
       | "125cc ou plus"
   ) => {
     setData((prev) => ({ ...prev, Typedemoto: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

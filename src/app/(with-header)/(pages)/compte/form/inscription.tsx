@@ -86,14 +86,18 @@ export default function InscriptionForm() {
   const onSubmit = async (data: InscriptionData) => {
     setSubmitError(null);
     try {
-      await registerUser({
+      const result = await registerUser({
         nom: data.nom,
         email: data.email,
         password: data.password,
         telephone: data.telephone || undefined,
         newsletter: data.newsletter || false,
       });
-      router.replace("/compte");
+      if (result.needsEmailVerification) {
+        router.replace(`/compte/verification-en-attente?email=${encodeURIComponent(data.email)}`);
+      } else {
+        router.replace("/compte");
+      }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Erreur lors de l'inscription");
     }

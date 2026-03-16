@@ -6,7 +6,7 @@ import { IconX } from "./PopupSupprimerledevis";
 import { IconDownload } from "@/app/(with-header)/(pages)/compte/page";
 
 export default function PopupCompteAssurance() {
-  const { activePopup, close } = usePopup();
+  const { activePopup, payload, close } = usePopup();
   const isOpen = activePopup === "PopupCompteAssurance";
 
   // Close on ESC
@@ -24,7 +24,12 @@ export default function PopupCompteAssurance() {
     };
   }, [isOpen, close]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !payload) return null;
+
+  const lead = payload;
+  const createdDate = lead.createdAt
+    ? new Date(lead.createdAt).toLocaleDateString("fr-FR")
+    : "—";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -36,30 +41,29 @@ export default function PopupCompteAssurance() {
 
       {/* Modal */}
       <div
-        className="relative p-8 f-col items-end gap-9 z-10 w-full max-w-[664px] 
+        className="relative p-8 f-col items-end gap-9 z-10 w-full max-w-[664px]
       rounded-4xl border border-Sage-Gray-Lower bg-white shadow-lg"
       >
         <div className="f-col gap-6 w-full">
           <div className="f-col gap-2">
-            <h4 className="Headings-H4">Assurance Auto</h4>
-            <span className="Text-S text-Sage-Gray-Higher">TRT-45821</span>
+            <h4 className="Headings-H4">{lead.type}</h4>
+            <span className="Text-S text-Sage-Gray-Higher">TRT-{lead.id}</span>
           </div>
           <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-            <span className="Text-S text-Sage-Gray-Higher">Assureur</span>
-            <span className="button-s">15/01/2024</span>
-            <span className="Text-S text-Sage-Gray-Higher">Date d'effet</span>
-            <span className="button-s">14/01/2025</span>
-            <span className="Text-S text-Sage-Gray-Higher">
-              Date d'échéance
+            <span className="Text-S text-Sage-Gray-Higher">Nom</span>
+            <span className="button-s">{lead.prenom} {lead.nom}</span>
+            <span className="Text-S text-Sage-Gray-Higher">Date de demande</span>
+            <span className="button-s">{createdDate}</span>
+            <span className="Text-S text-Sage-Gray-Higher">Statut</span>
+            <span className={`button-s w-fit py-1 px-3 rounded-full text-[12px] font-medium ${
+              lead.status === "Validé" || lead.status === "VALIDE"
+                ? "bg-green-100 text-green-700"
+                : lead.status === "Refusé"
+                ? "bg-red-100 text-red-700"
+                : "bg-amber-100 text-amber-700"
+            }`}>
+              {lead.status}
             </span>
-            <span className="button-s">Saham Assurance</span>
-          </div>
-          <div className="f-col gap-1">
-            <span className="Text-S text-Sage-Gray-Higher">Montant</span>
-            <div className="flex items-baseline gap-2">
-              <h3 className="Headings-H3">350 DH/mois</h3>
-              <span className="Text-S text-Sage-Gray-Higher">TTC</span>
-            </div>
           </div>
         </div>
         <button

@@ -34,27 +34,6 @@ export function IconTrash(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-export function IconDownload(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
-      viewBox="0 0 20 20"
-      fill="none"
-    >
-      <path
-        d="M15 16.875C15.3452 16.875 15.625 17.1548 15.625 17.5C15.625 17.8452 15.3452 18.125 15 18.125H5C4.65482 18.125 4.375 17.8452 4.375 17.5C4.375 17.1548 4.65482 16.875 5 16.875H15Z"
-        fill="#0F110C"
-      />
-      <path
-        d="M10 1.875C10.3452 1.875 10.625 2.15482 10.625 2.5V12.6579L13.7248 9.55811C13.9688 9.31403 14.3645 9.31403 14.6086 9.55811C14.8526 9.80218 14.8526 10.1978 14.6086 10.4419L10.4419 14.6086C10.1978 14.8526 9.80218 14.8526 9.55811 14.6086L5.39144 10.4419C5.14736 10.1978 5.14736 9.80218 5.39144 9.55811C5.63552 9.31403 6.03115 9.31403 6.27523 9.55811L9.375 12.6579V2.5C9.375 2.15482 9.65482 1.875 10 1.875Z"
-        fill="#0F110C"
-      />
-    </svg>
-  );
-}
 export function IconQuestion(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -77,8 +56,11 @@ export function IconQuestion(props: SVGProps<SVGSVGElement>) {
 
 export default function DraftsPage() {
   const router = useRouter();
-  const { drafts, loadDraft } = useDraft(); // use global reactive drafts
+  const { drafts, loadDraft, deleteDraft } = useDraft();
   const { open } = usePopup();
+
+  // Only show in-progress drafts — completed ones are in "Mes contrats"
+  const activeDrafts = drafts.filter((d) => d.status === "EN_COURS");
 
   return (
     <section className="w-full pt-5 px-4">
@@ -90,43 +72,31 @@ export default function DraftsPage() {
           </p>
         </div>
         <ul className="grid grid-cols-2 gap-3">
-          {drafts.map((draft) => {
+          {activeDrafts.map((draft) => {
             const progress = (draft.currentStep / draft.totalSteps) * 100;
 
             return (
               <li
                 key={draft.id}
                 onClick={() => {
-                  if (draft.status === "EN_COURS") {
-                    loadDraft(draft); // restore draft in context
-                    router.push(`/${draft.product}?draftId=${draft.id}`);
-                  }
+                  loadDraft(draft);
+                  router.push(`/${draft.product}?draftId=${draft.id}`);
                 }}
                 className="p-6 rounded-3xl bg-Sage-Gray-Lowest f-col gap-5 cursor-pointer transition hover:bg-Sage-Gray-Lower"
               >
                 <div className="flex items-start justify-between gap-1">
                   <div className="f-col gap-2">
                     <ul className="flex gap-2 button-s">
-                      {/* Reference */}
                       <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
                         <span className="size-2 rounded-full bg-Neutral-Dark shrink-0"></span>
                         <span>{draft.reference}</span>
                       </li>
-
-                      {/* Status */}
-                      {draft.status === "EN_COURS" ? (
-                        <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
-                          <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
-                          <span className="text-Secondary-Red-Medium">
-                            En cours
-                          </span>
-                        </li>
-                      ) : (
-                        <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-Brand-500">
-                          <span className="size-2 rounded-full bg-white shrink-0"></span>
-                          <span className="text-white">Validé</span>
-                        </li>
-                      )}
+                      <li className="py-1 px-3 rounded-full flex items-center gap-1.5 bg-white">
+                        <span className="size-2 rounded-full bg-Secondary-Red-Medium shrink-0"></span>
+                        <span className="text-Secondary-Red-Medium">
+                          En cours
+                        </span>
+                      </li>
                     </ul>
 
                     <div className="flex items-baseline gap-2">
@@ -137,53 +107,38 @@ export default function DraftsPage() {
                     </div>
                   </div>
 
-                  {/* Right icon */}
-                  {draft.status === "EN_COURS" ? (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation(); // ✅ prevent parent li click
-                        open("Supprimer le devis", { draftId: draft.id });
-                      }}
-                      className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer"
-                    >
-                      <IconTrash className="shrink-0" />
-                    </span>
-                  ) : (
-                    <span className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer">
-                      <IconDownload className="shrink-0" />
-                    </span>
-                  )}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      open("Supprimer le devis", { draftId: draft.id });
+                    }}
+                    className="flex p-2 rounded-full hover:bg-Sage-Gray-Medium transition cursor-pointer"
+                  >
+                    <IconTrash className="shrink-0" />
+                  </span>
                 </div>
 
-                {/* Bottom section */}
-                {draft.status === "EN_COURS" ? (
-                  <div className="f-col gap-2">
-                    <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
-                      <span>
-                        Étape {draft.currentStep} sur {draft.totalSteps}
-                      </span>
-                      <span>{Math.round(progress)}%</span>
-                    </div>
-                    <span className="relative">
-                      <span
-                        style={{ width: `${progress}%` }}
-                        className="bg-Neutral-Dark absolute inset-0 rounded-full"
-                      ></span>
-                      <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
+                <div className="f-col gap-2">
+                  <div className="text-Sage-Gray-Higher button2-s flex items-center justify-between">
+                    <span>
+                      Étape {draft.currentStep} sur {draft.totalSteps}
                     </span>
-                    <h3 className="button-s">{draft.title}</h3>
+                    <span>{Math.round(progress)}%</span>
                   </div>
-                ) : (
-                  <div className="f-col gap-1 button2-s text-Sage-Gray-Higher">
-                    <span>Infos de paiement envoyées par email</span>
-                    <span>Validé le {formatFullDate(draft.updatedAt)}</span>
-                  </div>
-                )}
+                  <span className="relative">
+                    <span
+                      style={{ width: `${progress}%` }}
+                      className="bg-Neutral-Dark absolute inset-0 rounded-full"
+                    ></span>
+                    <span className="bg-Sage-Gray-Medium flex h-1 w-full rounded-full"></span>
+                  </span>
+                  <h3 className="button-s">{draft.title}</h3>
+                </div>
               </li>
             );
           })}
         </ul>
-        {drafts.length === 0 && (
+        {activeDrafts.length === 0 && (
           <div className="py-15 flex-center flex-col gap-4 text-center">
             <span className="flex-center p-3 rounded-[12px] bg-Sage-Gray-Lower">
               <IconQuestion className=" shrink-0" />
@@ -212,10 +167,3 @@ const formatDate = (date: string) => {
   return `il y a ${Math.floor(diff)} jours`;
 };
 
-const formatFullDate = (date: string) => {
-  return new Date(date).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};

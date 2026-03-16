@@ -1,5 +1,6 @@
 import { Checkbox } from "@heroui/checkbox";
-import FormInput from "../../components/inputs/form-input"; // new generic input
+import FormInput from "../../components/inputs/form-input";
+import UserInfoRecap from "../../components/UserInfoRecap";
 import { useFormContext } from "../context";
 const timeSlots = [
   { value: "08:30 – 09:00", label: "08:30 – 09:00" },
@@ -25,45 +26,47 @@ export default function Step7() {
 
   return (
     <div className="flex flex-col gap-6 max-mobile:gap-4">
-      <div className="flex flex-col gap-4">
-        <h2 className="Button-M text-BG-Dark max-mobile:text-lg">
-          Coordonnées de contact
-        </h2>
-        <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
-          <FormInput
-            name="nom"
-            label="Nom"
-            placeholder="Ex : El Mehdi"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
-          <FormInput
-            name="prenom"
-            label="Prénom"
-            placeholder="Ex : Amine"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
+      <UserInfoRecap useFormContextHook={useFormContext}>
+        <div className="flex flex-col gap-4">
+          <h2 className="Button-M text-BG-Dark max-mobile:text-lg">
+            Coordonnées de contact
+          </h2>
+          <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
+            <FormInput
+              name="nom"
+              label="Nom"
+              placeholder="Ex : El Mehdi"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+            <FormInput
+              name="prenom"
+              label="Prénom"
+              placeholder="Ex : Amine"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+          </div>
+          <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
+            <FormInput
+              name="phone"
+              label="N° de téléphone"
+              placeholder="Ex : 06 12 34 56 78"
+              type="tel"
+              useFormContextHook={useFormContext}
+              isRequired
+            />
+            <FormInput
+              name="email"
+              label="Email (optionnel)"
+              placeholder="exemple@email.com"
+              useFormContextHook={useFormContext}
+              type="email"
+              isRequired={false}
+            />
+          </div>
         </div>
-        <div className="flex gap-4 max-mobile:flex-col max-mobile:gap-3">
-          <FormInput
-            name="phone"
-            label="N° de téléphone"
-            placeholder="Ex : 06 12 34 56 78"
-            type="tel"
-            useFormContextHook={useFormContext}
-            isRequired
-          />
-          <FormInput
-            name="email"
-            label="Email (optionnel)"
-            placeholder="exemple@email.com"
-            useFormContextHook={useFormContext}
-            type="email"
-            isRequired={false}
-          />
-        </div>
-      </div>
+      </UserInfoRecap>
       {/* TEMPORARILY HIDDEN - Date and Time fields
       <span className="Line"></span>
       <div className="flex flex-col gap-4">
@@ -109,8 +112,9 @@ export default function Step7() {
           onValueChange={handleTermsAccepted}
           isRequired={true}
         >
-          J&apos;ai lu et j&apos;accepte les conditions générales
-          d&apos;utilisation, notamment la mention relative à la protection des
+          J&apos;ai lu et j&apos;accepte les{" "}
+          <a href="/conditions-generales-utilisation" target="_blank" className="underline text-Brand-500 hover:text-Brand-600" onClick={(e) => e.stopPropagation()}>conditions générales
+          d&apos;utilisation</a>, notamment la mention relative à la protection des
           données personnelles.
         </Checkbox>
       </div>

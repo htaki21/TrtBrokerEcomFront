@@ -5,13 +5,14 @@ import { EssenceIcon } from "../../components/icons/Essence";
 import { HybrideIcon } from "../../components/icons/Hybride";
 import { ÉlectriqueIcon } from "../../components/icons/Électrique";
 
-export default function Step3() {
+export default function Step3({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (
     type: "Essence" | "Diesel" | "Hybride" | "Électrique"
   ) => {
     setData((prev) => ({ ...prev, carburant: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

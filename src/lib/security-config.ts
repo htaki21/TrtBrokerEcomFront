@@ -132,8 +132,10 @@ export const SECURITY_CONFIG = {
     "X-Frame-Options": "DENY",
     "X-XSS-Protection": "1; mode=block",
     "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Content-Security-Policy":
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:1337 https://trtecomadminv2.deadlinemaroc.com; frame-ancestors 'none';",
+    "Content-Security-Policy": (() => {
+      const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || "";
+      return `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: ${strapiUrl}; font-src 'self' data:; connect-src 'self' ${strapiUrl}; frame-ancestors 'none';`;
+    })(),
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     "Permissions-Policy":
       "camera=(), microphone=(), geolocation=(), interest-cohort=()",
@@ -230,10 +232,11 @@ export const SECURITY_CONFIG = {
   API: {
     REQUIRE_HTTPS: true,
     REQUIRE_API_KEY: false, // Set to true for additional protection
-    CORS_ORIGINS:
-      process.env.NODE_ENV === "production"
-        ? ["https://trtbroker.com", "https://trtecomv2.deadlinemaroc.com"]
-        : ["http://localhost:3000"],
+    CORS_ORIGINS: process.env.NEXT_PUBLIC_SITE_URL
+      ? [process.env.NEXT_PUBLIC_SITE_URL]
+      : (process.env.NODE_ENV === "production"
+        ? ["https://trtbroker.com"]
+        : ["http://localhost:3000"]),
     MAX_REQUESTS_PER_MINUTE: 60,
     MAX_REQUESTS_PER_HOUR: 1000,
   },
@@ -244,9 +247,9 @@ export const SECURITY_CONFIG = {
       "default-src": ["'self'"],
       "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://static.cloudflareinsights.com"],
       "style-src": ["'self'", "'unsafe-inline'"],
-      "img-src": ["'self'", "data:", "https:"],
+      "img-src": ["'self'", "data:", "https:", process.env.NEXT_PUBLIC_STRAPI_API_URL || ""].filter(Boolean),
       "font-src": ["'self'", "data:"],
-      "connect-src": ["'self'", "http://localhost:1337", "https://trtecomadminv2.deadlinemaroc.com"],
+      "connect-src": ["'self'", process.env.NEXT_PUBLIC_STRAPI_API_URL || ""].filter(Boolean),
       "frame-ancestors": ["'none'"],
       "base-uri": ["'self'"],
       "form-action": ["'self'"],

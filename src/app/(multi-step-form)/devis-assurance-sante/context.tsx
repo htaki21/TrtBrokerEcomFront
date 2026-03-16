@@ -66,7 +66,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     date: "",
     creneauHoraire: "",
     marketingConsent: false,
-    termsAccepted: false,
+    termsAccepted: true,
     // Additional fields for API compatibility
     typeAssurance: "sante_maroc",
     typeCouverture: [],

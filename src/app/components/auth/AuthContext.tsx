@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { AuthUser, getMe, loginUser, registerUser, updateMe, deleteAccount } from "@/lib/services/authService";
+import { AuthUser, RegisterResult, getMe, loginUser, registerUser, updateMe, deleteAccount, uploadPhoto, deletePhoto } from "@/lib/services/authService";
 
 const TOKEN_KEY = "trt_jwt";
 
@@ -10,9 +10,11 @@ interface AuthContextType {
   jwt: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (params: { nom: string; email: string; password: string; telephone?: string; newsletter?: boolean }) => Promise<void>;
+  register: (params: { nom: string; email: string; password: string; telephone?: string; newsletter?: boolean }) => Promise<RegisterResult>;
   logout: () => void;
   update: (data: Partial<Pick<AuthUser, "nom" | "email" | "telephone">> & { password?: string }) => Promise<void>;
+  updatePhoto: (file: File) => Promise<void>;
+  removePhoto: () => Promise<void>;
   removeAccount: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -66,14 +68,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setJwt(res.jwt);
     setIsLoading(false);
     localStorage.setItem(TOKEN_KEY, res.jwt);
+
+    // If there's a pending profile from registration, save it now
+    try {
+      const pending = localStorage.getItem("trt_pending_profile");
+      if (pending) {
+        localStorage.removeItem("trt_pending_profile");
+        const profileData = JSON.parse(pending);
+        updateMe(res.jwt, profileData)
+          .then((updated) => setUser(updated))
+          .catch(() => {});
+      }
+    } catch {}
   };
 
-  const register = async (params: { nom: string; email: string; password: string; telephone?: string; newsletter?: boolean }) => {
-    const res = await registerUser(params);
-    setUser(res.user);
-    setJwt(res.jwt);
-    setIsLoading(false);
-    localStorage.setItem(TOKEN_KEY, res.jwt);
+  const register = async (params: { nom: string; email: string; password: string; telephone?: string; newsletter?: boolean }): Promise<RegisterResult> => {
+    const result = await registerUser(params);
+    if (!result.needsEmailVerification && result.auth) {
+      setUser(result.auth.user);
+      setJwt(result.auth.jwt);
+      setIsLoading(false);
+      localStorage.setItem(TOKEN_KEY, result.auth.jwt);
+    }
+    return result;
   };
 
   const logout = () => {
@@ -86,6 +103,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(updated);
   };
 
+  const updatePhoto = async (file: File) => {
+    if (!jwt) throw new Error("Non authentifié");
+    const updated = await uploadPhoto(jwt, file);
+    setUser(updated);
+  };
+
+  const removePhoto = async () => {
+    if (!jwt) throw new Error("Non authentifié");
+    const updated = await deletePhoto(jwt);
+    setUser(updated);
+  };
+
   const removeAccount = async () => {
     if (!jwt) throw new Error("Non authentifié");
     await deleteAccount(jwt);
@@ -93,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, jwt, isLoading, login, register, logout, update, removeAccount, refreshUser }}>
+    <AuthContext.Provider value={{ user, jwt, isLoading, login, register, logout, update, updatePhoto, removePhoto, removeAccount, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

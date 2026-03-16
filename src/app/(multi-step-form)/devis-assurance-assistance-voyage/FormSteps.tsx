@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowIcon } from "@/app/components/icons/ArrowIcon";
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import NavigationButtons from "../navigation-buttons";
 import { useFormContext } from "./context";
@@ -61,6 +61,21 @@ function FinalStepSubmitButton({
               email: data.email,
               dureeVisa: data.dureeVisa,
               reference: result.reference,
+            }));
+            // Also save in generic format
+            sessionStorage.setItem("formSuccessData", JSON.stringify({
+              productName: "Assistance Voyage",
+              prenom: data.prenom,
+              nom: data.nom,
+              email: data.email,
+              reference: result.reference,
+              assistanceVoyage: data.assistanceVoyage,
+              primedelassistance: data.primedelassistance,
+              dureedelacouverture: data.dureedelacouverture,
+              transport: data.transport,
+              situationfamiliale: data.situationfamiliale,
+              modePaiement: data.modePaiement,
+              dureeVisa: data.dureeVisa,
             }));
           } catch {}
 
@@ -138,12 +153,12 @@ export default function FormSteps() {
     // Common steps
     step1: {
       ...step1Data,
-      component: <Step1 />,
+      component: <Step1 goToNextStep={() => handleNextRef.current()} />,
       next: () => "step2",
     },
     step2: {
       ...step2Data,
-      component: <Step2 />,
+      component: <Step2 goToNextStep={() => handleNextRef.current()} />,
       next: (data?: Record<string, unknown>) => {
         if (!data) return null;
         switch (data.assistanceVoyage) {
@@ -283,6 +298,10 @@ export default function FormSteps() {
       setHistory((h) => [...h, nextId]);
     }
   };
+
+  // Ref to always get the latest handleNext (avoids stale closure in setTimeout)
+  const handleNextRef = useRef(handleNext);
+  handleNextRef.current = handleNext;
 
   const handlePrev = () => {
     if (history.length > 1) {

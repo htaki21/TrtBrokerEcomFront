@@ -3,13 +3,14 @@ import Card from "../../components/cards/card";
 import { SantéMarocIcon } from "../../components/icons/SantéMaroc";
 import { SantéMarocInternationalIcon } from "../../components/icons/SantéMarocInternational";
 
-export default function Step1() {
+export default function Step1({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (
     type: "Santé Maroc" | "Santé Maroc + International"
   ) => {
     setData((prev) => ({ ...prev, planSante: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (

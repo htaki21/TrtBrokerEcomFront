@@ -3,11 +3,12 @@ import Card from "../../components/cards/card";
 import { OccasionIcon } from "../../components/icons/FilledIcon";
 import { NouvelAchatIcon } from "../../components/icons/SettingsIcon";
 
-export default function Step1() {
+export default function Step1({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (type: "Nouvel Achat" | "Occasion") => {
     setData((prev) => ({ ...prev, Typedachat: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
 
   return (
