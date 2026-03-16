@@ -180,7 +180,7 @@ export default function ConnexionForm() {
         {submitError && (
           <div className="text-red-500 f-col items-center gap-1">
             <p>{submitError}</p>
-            {submitError.includes("confirmée") && (
+            {(submitError.includes("confirmée") || submitError.includes("vérifiée")) && (
               <Link href="/compte/verification-en-attente" className="text-Brand-600 underline text-sm">
                 Renvoyer l&apos;email de confirmation
               </Link>

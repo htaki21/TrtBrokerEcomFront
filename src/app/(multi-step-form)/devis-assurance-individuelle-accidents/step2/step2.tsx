@@ -53,6 +53,7 @@ export default function Step2() {
           </div>
           <Calendar24
             label="Date de réception souhaitée"
+            isRequired
             placeholder="mm/dd/yyyy"
             value={
               data.dateReceptionSouhaitee

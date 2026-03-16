@@ -19,6 +19,7 @@ interface Calendar24Props<FormDataType extends FieldValues = FieldValues> {
   placeholder?: string;
   value?: Date;
   onChange?: (date: Date | undefined) => void;
+  isRequired?: boolean;
 }
 
 export function Calendar24<FormDataType extends FieldValues = FieldValues>({
@@ -28,6 +29,7 @@ export function Calendar24<FormDataType extends FieldValues = FieldValues>({
   placeholder = "Sélectionnez une date",
   value,
   onChange,
+  isRequired,
 }: Calendar24Props<FormDataType>) {
   const [open, setOpen] = React.useState(false);
   const [localDate, setLocalDate] = React.useState<Date | undefined>(value);
@@ -65,7 +67,7 @@ export function Calendar24<FormDataType extends FieldValues = FieldValues>({
               clearDate={() => field.onChange(undefined)}
               label={label}
               placeholder={placeholder}
-              // error={fieldState.error?.message}
+              isRequired={isRequired}
             />
           );
         }}
@@ -83,6 +85,7 @@ export function Calendar24<FormDataType extends FieldValues = FieldValues>({
       clearDate={clearDate}
       label={label}
       placeholder={placeholder}
+      isRequired={isRequired}
     />
   );
 }
@@ -97,6 +100,7 @@ interface DatePickerUIProps {
   label?: string;
   placeholder?: string;
   error?: string;
+  isRequired?: boolean;
 }
 
 function DatePickerUI({
@@ -108,6 +112,7 @@ function DatePickerUI({
   label,
   placeholder,
   error,
+  isRequired,
 }: DatePickerUIProps) {
   return (
     <div className="flex w-full flex-col gap-2 relative">
@@ -116,7 +121,7 @@ function DatePickerUI({
           htmlFor="date-picker"
           className="text-Neutral-Dark px-1 font-normal text-[14px]/[20px]"
         >
-          {label}
+          {label}{isRequired && <span className="text-red-500 ml-0.5">*</span>}
         </Label>
       )}
       <Popover open={open} onOpenChange={setOpen}>

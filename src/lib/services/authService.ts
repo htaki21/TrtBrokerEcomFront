@@ -16,7 +16,21 @@ const errorMessages: Record<string, string> = {
 };
 
 function translateError(message: string, fallback: string): string {
-  return errorMessages[message] || fallback;
+  if (!message) return fallback;
+  // Exact match first
+  if (errorMessages[message]) return errorMessages[message];
+  // Partial match for variations (e.g. Strapi v5 may send slightly different messages)
+  const lowerMsg = message.toLowerCase();
+  if (lowerMsg.includes("not confirmed") || lowerMsg.includes("email is not confirmed")) {
+    return "Votre adresse email n'est pas encore vérifiée. Consultez votre boîte mail pour confirmer votre compte.";
+  }
+  if (lowerMsg.includes("invalid identifier") || lowerMsg.includes("invalid credentials")) {
+    return "Email ou mot de passe incorrect";
+  }
+  if (lowerMsg.includes("blocked")) {
+    return "Votre compte a été bloqué par un administrateur";
+  }
+  return fallback;
 }
 
 export interface StrapiMedia {
