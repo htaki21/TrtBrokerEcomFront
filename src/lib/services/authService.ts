@@ -80,8 +80,14 @@ export async function loginUser(identifier: string, password: string): Promise<A
   const data = await res.json();
 
   if (!res.ok) {
-    const err = data as StrapiError;
-    throw new Error(translateError(err.error?.message, "Erreur de connexion. Vérifiez vos identifiants."));
+    // Strapi can return errors in multiple formats depending on version
+    const errMsg =
+      data?.error?.message ||           // Strapi v4/v5: { error: { message: "..." } }
+      data?.message?.[0]?.messages?.[0]?.message || // Strapi v3: { message: [{ messages: [{ message }] }] }
+      data?.message ||                  // Simple: { message: "..." }
+      (typeof data === "string" ? data : "");
+    console.log("[TRT Auth] Login error response:", JSON.stringify(data));
+    throw new Error(translateError(errMsg, "Erreur de connexion. Vérifiez vos identifiants."));
   }
 
   return data as AuthResponse;
