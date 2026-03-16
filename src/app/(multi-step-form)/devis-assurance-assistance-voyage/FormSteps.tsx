@@ -147,7 +147,7 @@ type Step = {
 };
 
 export default function FormSteps() {
-  const { data, setData } = useFormContext();
+  const { data, setData, clearFieldError } = useFormContext();
 
   const stepConfig: Record<string, Step> = {
     // Common steps
@@ -182,7 +182,7 @@ export default function FormSteps() {
       header: "Confirmez la durée de votre couverture",
       description:
         "Indiquez la période pendant laquelle vous souhaitez être protégé.e",
-      component: <DureeDeLaCouverture />,
+      component: <DureeDeLaCouverture goToNextStep={() => handleNextRef.current()} />,
       next: () => "a2",
     },
     a2: {
@@ -190,7 +190,7 @@ export default function FormSteps() {
       header: "Voyagez-vous avec votre véhicule personnel ?",
       description:
         "Indiquez la période pendant laquelle vous souhaitez être protégé.",
-      component: <Transport />,
+      component: <Transport goToNextStep={() => handleNextRef.current()} />,
       next: () => "a3",
     },
     a3: {
@@ -206,7 +206,7 @@ export default function FormSteps() {
       header: "Confirmez la durée de votre couverture",
       description:
         "Indiquez la période pendant laquelle vous souhaitez être protégé.e",
-      component: <DureeDeLaCouverture />,
+      component: <DureeDeLaCouverture goToNextStep={() => handleNextRef.current()} />,
       next: () => "b2",
     },
     b2: {
@@ -230,7 +230,7 @@ export default function FormSteps() {
       header: "Votre situation familiale ?",
       description:
         "Indiquez la période pendant laquelle vous souhaitez être protégé.",
-      component: <SituationFamiliale />,
+      component: <SituationFamiliale goToNextStep={() => handleNextRef.current()} />,
       next: () => "d2",
     },
     d2: {
@@ -327,6 +327,8 @@ useEffect(() => {
       if (draft.currentStepId) setCurrentStepId(draft.currentStepId); // navigate to correct step
       if (draft.history) setHistory(draft.history); // restore history
       setData(draft.formData); // restore form inputs
+      clearFieldError("email");
+      clearFieldError("phone");
     }
   }
 }, [draftId, drafts]);

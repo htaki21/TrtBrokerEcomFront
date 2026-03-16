@@ -74,8 +74,29 @@ function drawLine(doc: jsPDF, x1: number, y1: number, x2: number, y2: number, c:
   doc.line(x1, y1, x2, y2);
 }
 
+// Sanitize text to prevent jsPDF Arabic parser crash
+function safe(val: unknown): string {
+  if (val === null || val === undefined) return "";
+  return String(val).replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, "");
+}
+
 // ── Main ──
 export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
+  // Sanitize all string fields to prevent Arabic parser crash
+  const d = {
+    reference: safe(data.reference),
+    assistanceVoyage: safe(data.assistanceVoyage),
+    primedelassistance: data.primedelassistance || 350,
+    dureedelacouverture: safe(data.dureedelacouverture),
+    transport: safe(data.transport),
+    situationfamiliale: safe(data.situationfamiliale),
+    modePaiement: safe(data.modePaiement),
+    prenom: safe(data.prenom),
+    nom: safe(data.nom),
+    phone: safe(data.phone),
+    email: safe(data.email),
+    dureeVisa: safe(data.dureeVisa),
+  };
   const doc = new jsPDF("p", "mm", "a4");
   const W = 210;
   const H = 297;
@@ -140,7 +161,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   color(doc, C.brand);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text(data.reference, refChipX + 5, refChipY + 13);
+  doc.text(d.reference, refChipX + 5, refChipY + 13);
 
   y = 36;
 
@@ -163,7 +184,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   doc.text(`Émis le ${dateStr}`, M, y + 14);
 
   // Product badge
-  const productLabel = getAssistanceLabel(data.assistanceVoyage);
+  const productLabel = getAssistanceLabel(d.assistanceVoyage);
   fill(doc, C.brand);
   const badgeW = doc.getTextWidth(productLabel) * 0.352778 * 9 + 12; // approximate width
   const badgeTextW = doc.getTextWidth(productLabel);
@@ -198,7 +219,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   color(doc, C.muted);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  const statusRight = `Montant : ${data.primedelassistance || 350} DH TTC`;
+  const statusRight = `Montant : ${d.primedelassistance} DH TTC`;
   const srW = doc.getTextWidth(statusRight);
   doc.text(statusRight, W - M - 5 - srW, y + 7);
 
@@ -229,11 +250,11 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
 
   // Client rows
   const clientRows: [string, string][] = [
-    ["Prénom", data.prenom],
-    ["Nom", data.nom],
-    ["Téléphone", data.phone],
+    ["Prénom", d.prenom],
+    ["Nom", d.nom],
+    ["Téléphone", d.phone],
   ];
-  if (data.email) clientRows.push(["Email", data.email]);
+  if (d.email) clientRows.push(["Email", d.email]);
 
   let cy = y + 16;
   for (const [label, value] of clientRows) {
@@ -270,13 +291,13 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   doc.text("Détails de la demande", colR + 9, cardStartY + 9);
 
   const detailRows: [string, string][] = [
-    ["Produit", getAssistanceLabel(data.assistanceVoyage)],
+    ["Produit", getAssistanceLabel(d.assistanceVoyage)],
   ];
-  if (data.dureeVisa) detailRows.push(["Durée du visa", data.dureeVisa]);
-  if (data.dureedelacouverture) detailRows.push(["Durée de couverture", data.dureedelacouverture]);
-  if (data.transport) detailRows.push(["Véhicule personnel", data.transport]);
-  if (data.situationfamiliale) detailRows.push(["Situation familiale", data.situationfamiliale]);
-  detailRows.push(["Mode de paiement", data.modePaiement || "Paiement en agence"]);
+  if (d.dureeVisa) detailRows.push(["Durée du visa", d.dureeVisa]);
+  if (d.dureedelacouverture) detailRows.push(["Durée de couverture", d.dureedelacouverture]);
+  if (d.transport) detailRows.push(["Véhicule personnel", d.transport]);
+  if (d.situationfamiliale) detailRows.push(["Situation familiale", d.situationfamiliale]);
+  detailRows.push(["Mode de paiement", d.modePaiement || "Paiement en agence"]);
 
   let dy = cardStartY + 16;
   for (const [label, value] of detailRows) {
@@ -319,7 +340,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   doc.text("Toutes taxes comprises", M + 8, y + 18);
 
   // Right: price
-  const priceStr = `${(data.primedelassistance || 350).toLocaleString("fr-FR")} DH`;
+  const priceStr = `${d.primedelassistance.toLocaleString("fr-FR")} DH`;
   color(doc, C.brand);
   doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
@@ -350,7 +371,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
 
   y += 14;
 
-  const isVirement = data.modePaiement === "Virement bancaire";
+  const isVirement = d.modePaiement === "Virement bancaire";
 
   type StepInfo = { num: string; title: string; desc: string };
   const steps: StepInfo[] = isVirement
@@ -360,7 +381,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
         { num: "03", title: "Activation du contrat", desc: "Une fois le virement reçu et vérifié, votre contrat d'assistance sera activé sous 24 heures ouvrées." },
       ]
     : [
-        { num: "01", title: "Rendez-vous en agence", desc: `Présentez-vous dans l'une de nos agences TRT Broker avec votre référence : ${data.reference}` },
+        { num: "01", title: "Rendez-vous en agence", desc: `Présentez-vous dans l'une de nos agences TRT Broker avec votre référence : ${d.reference}` },
         { num: "02", title: "Finalisation du contrat", desc: "Un conseiller expert vous accompagnera pour finaliser votre contrat d'assistance voyage sur place." },
         { num: "03", title: "Couverture immédiate", desc: "Votre couverture prend effet dès la signature du contrat. Voyagez l'esprit tranquille." },
       ];
@@ -477,7 +498,7 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   color(doc, C.brand);
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
-  const refTxt = data.reference;
+  const refTxt = d.reference;
   const refTxtW = doc.getTextWidth(refTxt);
   doc.text(refTxt, W - M - refTxtW, fY + 5.5);
 
@@ -489,5 +510,5 @@ export async function generateVoyagePdf(data: VoyagePdfData): Promise<void> {
   doc.text(pageText, W - M - pageW, fY + 9);
 
   // ── Save ──
-  doc.save(`TRT-Broker_${data.reference}.pdf`);
+  doc.save(`TRT-Broker_${d.reference}.pdf`);
 }

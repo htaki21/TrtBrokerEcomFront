@@ -19,7 +19,7 @@ import { useDraft } from "../../(with-header)/(pages)/drafts/DraftContext";
 import { useSearchParams } from "next/navigation";
 
 export default function FormSteps() {
-  const { data, setData } = useFormContext(); // ✅ safe, inside provider
+  const { data, setData, clearFieldError } = useFormContext(); // ✅ safe, inside provider
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const stepDataList = [
@@ -72,6 +72,8 @@ export default function FormSteps() {
         loadDraft(draft); // restore registeredData
         setCurrentStepIndex(draft.currentStep - 1); // -1 because index starts at 0
         setData(draft.formData); // restore form inputs
+        clearFieldError("email");
+        clearFieldError("phone");
       }
     }
   }, [draftId, drafts]);

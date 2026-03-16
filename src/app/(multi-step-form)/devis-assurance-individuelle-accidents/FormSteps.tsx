@@ -37,7 +37,7 @@ export default function FormSteps() {
 
   // const progressPercent = ((currentStepIndex + 1) / stepsCount) * 100;
 
-  const { data, setData } = useFormContext(); // your form state hook
+  const { data, setData, clearFieldError } = useFormContext(); // your form state hook
   const { drafts, loadDraft, registerDraftData, setDraftId } =
     useDraft();
 
@@ -53,6 +53,8 @@ export default function FormSteps() {
         loadDraft(draft); // restore registeredData
         setCurrentStepIndex(draft.currentStep - 1); // -1 because index starts at 0
         setData(draft.formData); // restore form inputs
+        clearFieldError("email");
+        clearFieldError("phone");
       }
     }
   }, [draftId, drafts]);

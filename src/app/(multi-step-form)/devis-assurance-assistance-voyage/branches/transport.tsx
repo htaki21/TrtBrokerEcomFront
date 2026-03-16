@@ -38,11 +38,12 @@ export function NonIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export default function Transport() {
+export default function Transport({ goToNextStep }: { goToNextStep?: () => void }) {
     const { data, setData } = useFormContext();
-  
+
     const handleSelect = (type: "Oui" | "Non") => {
       setData((prev) => ({ ...prev, transport: type }));
+      if (goToNextStep) setTimeout(goToNextStep, 300);
     };
   return (
     <div className="flex gap-4 max-tablet:flex-col max-tablet:gap-2">

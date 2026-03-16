@@ -3,11 +3,12 @@
 import { useFormContext } from "../context";
 import Card from "../../components/cards/card";
 
-export default function DureeDeLaCouverture() {
+export default function DureeDeLaCouverture({ goToNextStep }: { goToNextStep?: () => void }) {
   const { data, setData } = useFormContext();
 
   const handleSelect = (type: "6 mois" | "1 an") => {
     setData((prev) => ({ ...prev, dureedelacouverture: type }));
+    if (goToNextStep) setTimeout(goToNextStep, 300);
   };
   return (
     <div className="flex gap-4 max-tablet:flex-col max-tablet:gap-2">

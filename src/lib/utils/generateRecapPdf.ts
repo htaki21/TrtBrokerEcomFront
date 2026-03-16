@@ -75,7 +75,27 @@ function formatDate(dateStr: string): string {
   }
 }
 
+// Sanitize text to prevent jsPDF Arabic parser crash
+function safe(val: unknown): string {
+  if (val === null || val === undefined) return "";
+  return String(val).replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, "");
+}
+
 export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
+  // Sanitize all string fields
+  const s = {
+    reference: safe(data.reference),
+    productName: safe(data.productName),
+    prenom: safe(data.prenom),
+    nom: safe(data.nom),
+    phone: safe(data.phone),
+    email: safe(data.email),
+    modePaiement: safe(data.modePaiement),
+    formuleAccidents: safe(data.formuleAccidents),
+    dateReceptionSouhaitee: safe(data.dateReceptionSouhaitee),
+    creneauHoraire: safe(data.creneauHoraire),
+    prixFormule: data.prixFormule,
+  };
   const doc = new jsPDF("p", "mm", "a4");
   const W = 210;
   const H = 297;
@@ -93,7 +113,7 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
   });
 
   // Resolve price from formula name
-  const price = data.prixFormule || (data.formuleAccidents ? FORMULE_PRICES[data.formuleAccidents] : undefined);
+  const price = s.prixFormule || (s.formuleAccidents ? FORMULE_PRICES[s.formuleAccidents] : undefined);
 
   let y = 0;
 
@@ -136,7 +156,7 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
   color(doc, C.brand);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text(data.reference, refChipX + 5, y + 13);
+  doc.text(s.reference, refChipX + 5, y + 13);
 
   y = 36;
   drawLine(doc, M, y, W - M, y, C.divider, 0.5);
@@ -160,11 +180,11 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
   const badgePad = 5;
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  const badgeTextW = doc.getTextWidth(data.productName);
+  const badgeTextW = doc.getTextWidth(s.productName);
   const actualBadgeW = badgeTextW + badgePad * 2;
   rRect(doc, W - M - actualBadgeW, y + 1, actualBadgeW, 8, 2, "F");
   color(doc, C.white);
-  doc.text(data.productName, W - M - actualBadgeW + badgePad, y + 6.5);
+  doc.text(s.productName, W - M - actualBadgeW + badgePad, y + 6.5);
 
   y += 22;
 
@@ -202,20 +222,20 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
 
   // ── LEFT CARD: Client Info ──
   const clientRows: [string, string][] = [
-    ["Prénom", data.prenom],
-    ["Nom", data.nom],
+    ["Prénom", s.prenom],
+    ["Nom", s.nom],
   ];
-  if (data.phone) clientRows.push(["Téléphone", data.phone]);
-  if (data.email) clientRows.push(["Email", data.email]);
+  if (s.phone) clientRows.push(["Téléphone", s.phone]);
+  if (s.email) clientRows.push(["Email", s.email]);
 
   // ── RIGHT CARD: Request Details ──
   const detailRows: [string, string][] = [
-    ["Produit", data.productName],
+    ["Produit", s.productName],
   ];
-  if (data.formuleAccidents) detailRows.push(["Formule", data.formuleAccidents]);
-  if (data.dateReceptionSouhaitee) detailRows.push(["Date souhaitée", formatDate(data.dateReceptionSouhaitee)]);
-  if (data.creneauHoraire) detailRows.push(["Créneau horaire", data.creneauHoraire]);
-  detailRows.push(["Mode de paiement", data.modePaiement || "Paiement en agence"]);
+  if (s.formuleAccidents) detailRows.push(["Formule", s.formuleAccidents]);
+  if (s.dateReceptionSouhaitee) detailRows.push(["Date souhaitée", formatDate(s.dateReceptionSouhaitee)]);
+  if (s.creneauHoraire) detailRows.push(["Créneau horaire", s.creneauHoraire]);
+  detailRows.push(["Mode de paiement", s.modePaiement || "Paiement en agence"]);
 
   // Compute card height to fit both columns
   const rowH = 11;
@@ -330,7 +350,7 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
   doc.rect(M, y + 7.5, 25, 1, "F");
   y += 14;
 
-  const isVirement = data.modePaiement === "Virement bancaire";
+  const isVirement = s.modePaiement === "Virement bancaire";
   const steps = isVirement
     ? [
         { num: "01", title: "Effectuez le virement", desc: "Les coordonnées bancaires vous ont été envoyées par email. Indiquez la référence ci-dessus dans le motif du virement." },
@@ -338,7 +358,7 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
         { num: "03", title: "Activation du contrat", desc: "Une fois le virement reçu et vérifié, votre contrat sera activé sous 24 heures ouvrées." },
       ]
     : [
-        { num: "01", title: "Rendez-vous en agence", desc: `Présentez-vous dans l'une de nos agences TRT Broker avec votre référence : ${data.reference}` },
+        { num: "01", title: "Rendez-vous en agence", desc: `Présentez-vous dans l'une de nos agences TRT Broker avec votre référence : ${s.reference}` },
         { num: "02", title: "Finalisation du contrat", desc: "Un conseiller expert vous accompagnera pour finaliser votre contrat sur place." },
         { num: "03", title: "Couverture immédiate", desc: "Votre couverture prend effet dès la signature du contrat." },
       ];
@@ -429,13 +449,13 @@ export async function generateRecapPdf(data: RecapPdfData): Promise<void> {
   color(doc, C.brand);
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
-  const refTxtW = doc.getTextWidth(data.reference);
-  doc.text(data.reference, W - M - refTxtW, fY + 5.5);
+  const refTxtW = doc.getTextWidth(s.reference);
+  doc.text(s.reference, W - M - refTxtW, fY + 5.5);
   color(doc, C.muted);
   doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   const pageW = doc.getTextWidth("Page 1/1");
   doc.text("Page 1/1", W - M - pageW, fY + 9);
 
-  doc.save(`TRT-Broker_${data.reference}.pdf`);
+  doc.save(`TRT-Broker_${s.reference}.pdf`);
 }

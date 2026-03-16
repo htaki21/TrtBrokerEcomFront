@@ -4,11 +4,12 @@ import { MoiIcon } from "../../components/icons/Moi";
 import { CouplerIcon } from "../../components/icons/Couple";
 import { FamilleIcon } from "../../components/icons/Famille";
 
-export default function SituationFamiliale() {
+export default function SituationFamiliale({ goToNextStep }: { goToNextStep?: () => void }) {
     const { data, setData } = useFormContext();
-  
+
     const handleSelect = (type: "Individuel" | "Couple" | "Famille") => {
       setData((prev) => ({ ...prev, situationfamiliale: type }));
+      if (goToNextStep) setTimeout(goToNextStep, 300);
     };
   return (
     <div className="flex gap-4 max-tablet:flex-col max-tablet:gap-2">

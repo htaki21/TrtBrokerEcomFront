@@ -3,6 +3,7 @@
 import ButtonLink from "@/app/components/buttons/ButtonLink";
 import { generateRecapPdf } from "@/lib/utils/generateRecapPdf";
 import { generateVoyagePdf } from "@/lib/utils/generateVoyagePdf";
+import { useRouter } from "next/navigation";
 import { SVGProps, useEffect, useState } from "react";
 
 export function IconCheck(props: SVGProps<SVGSVGElement>) {
@@ -132,6 +133,7 @@ export default function SuccessPage() {
   const [reference, setReference] = useState("");
   const [isVoyage, setIsVoyage] = useState(false);
   const [hasPayment, setHasPayment] = useState(false);
+  const router = useRouter();
 
   const PAYMENT_PRODUCTS = ["Assistance Voyage", "Individuelle Accidents"];
 
@@ -161,9 +163,10 @@ export default function SuccessPage() {
         return;
       }
 
-      setReference(generateReference());
+      // No form data found — user accessed /success directly, redirect home
+      router.replace("/");
     } catch {
-      setReference(generateReference());
+      router.replace("/");
     }
   }, []);
 
