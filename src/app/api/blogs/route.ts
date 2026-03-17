@@ -86,67 +86,34 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Add search filter if provided with comprehensive sanitization
+    // Add search filter if provided
     if (search) {
-      // Comprehensive sanitization to prevent all types of injection attacks
+      // Sanitize: allow letters (including French accents), digits, spaces, hyphens, apostrophes
       const sanitizedSearch = search
         .trim()
-        // XSS Protection
-        .replace(/[<>]/g, "") // Remove HTML tags
-        .replace(/javascript:/gi, "") // Remove javascript protocol
-        .replace(/on\w+=/gi, "") // Remove event handlers
-        .replace(/data:/gi, "") // Remove data URLs
-        .replace(/vbscript:/gi, "") // Remove vbscript
-        .replace(/eval\s*\(/gi, "") // Remove eval calls
-        .replace(/expression\s*\(/gi, "") // Remove CSS expressions
+        .replace(/[<>]/g, "")
+        .replace(/['"`;\\]/g, "")
+        .replace(/--/g, "")
+        .replace(/\.\./g, "")
+        .replace(/[|&;$`{}]/g, "")
+        .replace(/\s+/g, " ")
+        .replace(/[^\p{L}\p{N}\s\-_.]/gu, "") // Allow all Unicode letters (French accents) + digits + spaces + hyphens
+        .substring(0, 80);
 
-        // SQL Injection Protection (enhanced patterns)
-        .replace(/['"`;\\]/g, "") // Remove SQL injection characters
-        .replace(/--/g, "") // Remove SQL comments
-        .replace(/\/\*/g, "") // Remove SQL block comment start
-        .replace(/\*\//g, "") // Remove SQL block comment end
-        .replace(
-          /\b(select|from|union|insert|update|delete|drop|create|alter|exec|execute|script|xp_cmdshell|sp_executesql)\b/gi,
-          "",
-        ) // Remove SQL keywords
-        .replace(/\b(or|and)\s*(1\s*=\s*1|true|false)\b/gi, "") // Remove SQL boolean injections
-        .replace(/\|\||&&/g, "") // Remove logical operators that could be used in injections
-
-        // NoSQL Injection Protection
-        .replace(/\$\w+/g, "") // Remove MongoDB operators
-        .replace(/\{|\}/g, "") // Remove JSON-like structures
-
-        // Directory Traversal Protection
-        .replace(/\.\./g, "") // Remove directory traversal
-        .replace(/[\\\/]/g, "") // Remove path separators
-
-        // Command Injection Protection
-        .replace(/[|&;$`]/g, "") // Remove command injection characters
-        .replace(/\$\(/g, "") // Remove command substitution
-
-        // Additional security measures
-        .replace(/\s+/g, " ") // Normalize multiple spaces to single space
-        .replace(/[^\w\s\-_.]/g, "") // Only allow alphanumeric, spaces, hyphens, underscores, dots
-        .substring(0, 50); // Reasonable limit for search queries
-
-      // Check for suspicious patterns after sanitization
       if (sanitizedSearch && !detectSuspiciousInput(sanitizedSearch)) {
-        url += `&filters[$or][0][titre][$containsi]=${encodeURIComponent(sanitizedSearch)}&`;
-        url += `filters[$or][1][slug][$containsi]=${encodeURIComponent(sanitizedSearch)}&`;
-        url += `filters[$or][2][categorie][nom][$containsi]=${encodeURIComponent(sanitizedSearch)}`;
-      } else if (search !== sanitizedSearch && detectSuspiciousInput(search)) {
-        // Log suspicious search attempts
-        logSecurityEvent(
-          "SUSPICIOUS_SEARCH_ATTEMPT",
-          {
-            endpoint: "/api/blogs",
-            ip: getClientIP(request),
-            userAgent: request.headers.get("user-agent"),
-            originalSearch: search,
-            sanitizedSearch: sanitizedSearch,
-          },
-          request,
-        );
+        // Split into words and search each word independently for better multi-word matching
+        const words = sanitizedSearch.split(" ").filter((w) => w.length >= 2);
+        if (words.length === 1) {
+          // Single word: search in title, slug, and category
+          url += `&filters[$or][0][titre][$containsi]=${encodeURIComponent(words[0])}`;
+          url += `&filters[$or][1][slug][$containsi]=${encodeURIComponent(words[0])}`;
+          url += `&filters[$or][2][categorie][nom][$containsi]=${encodeURIComponent(words[0])}`;
+        } else {
+          // Multiple words: each word must match the title (AND logic)
+          words.forEach((word, i) => {
+            url += `&filters[$and][${i}][titre][$containsi]=${encodeURIComponent(word)}`;
+          });
+        }
       }
     }
 
