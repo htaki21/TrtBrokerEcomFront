@@ -3,10 +3,11 @@ interface IndividuelleAccidentsFormData {
   dateReceptionSouhaitee: string;
   prenom: string;
   nom: string;
-  email?: string; // Made optional
+  email?: string;
   phone: string;
   date: string;
   creneauHoraire: string;
+  modePaiement: string;
   marketingConsent: boolean;
   termsAccepted: boolean;
 }
@@ -59,19 +60,33 @@ const mapFormDataToApi = (formData: IndividuelleAccidentsFormData) => {
     throw new Error("Vous devez sélectionner une formule d'assurance");
   }
 
+  const priceMapping: Record<string, number> = {
+    "Formule Basique": 312.50,
+    "Formule Confort": 427.50,
+    "Formule Premium": 738.00,
+  };
+
+  const modePaiementMapping: Record<string, string> = {
+    "Paiement en agence": "paiement_en_agence",
+    "Virement bancaire": "virement_bancaire",
+  };
+
   const apiData: Record<string, unknown> = {
     formuleAssurance:
       formuleMapping[formData.formuleAccidents] || formData.formuleAccidents,
+    formuleDisplay: formData.formuleAccidents,
+    prixFormule: priceMapping[formData.formuleAccidents] || 0,
     prenom: formData.prenom.trim(),
     nom: formData.nom.trim(),
     telephone: formData.phone.trim(),
     email: formData.email?.trim().toLowerCase() || "",
+    modePaiement: modePaiementMapping[formData.modePaiement] || "paiement_en_agence",
     optinMarketing: formData.marketingConsent,
     conditionsAcceptees: formData.termsAccepted,
-    ipAddress: "127.0.0.1", // Default IP for localhost
+    ipAddress: "127.0.0.1",
     userAgent: navigator.userAgent,
     source: "website",
-    notes: `Date de réception souhaitée: ${formData.dateReceptionSouhaitee}`,
+    notes: `Formule: ${formData.formuleAccidents} - Prix: ${priceMapping[formData.formuleAccidents] || 0} DH - Mode de paiement: ${formData.modePaiement} - Date de réception souhaitée: ${formData.dateReceptionSouhaitee}`,
   };
 
   // REMOVED - Date/Time fields hidden
