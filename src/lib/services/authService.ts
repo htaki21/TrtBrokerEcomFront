@@ -190,12 +190,18 @@ export async function resendConfirmationEmail(email: string): Promise<void> {
 }
 
 export async function getMe(jwt: string): Promise<AuthUser> {
-  const res = await fetch(`${STRAPI_URL}/api/users/me`, {
+  // Use custom endpoint that returns user with photo populated
+  const res = await fetch(`${STRAPI_URL}/api/user-profile/me`, {
     headers: { Authorization: `Bearer ${jwt}` },
   });
 
   if (!res.ok) {
-    throw new Error("Session expirée");
+    // Fallback to standard endpoint
+    const fallback = await fetch(`${STRAPI_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+    if (!fallback.ok) throw new Error("Session expirée");
+    return fallback.json();
   }
 
   return res.json();
