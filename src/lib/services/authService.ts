@@ -124,8 +124,11 @@ export async function registerUser(params: {
   const data = await res.json();
 
   if (!res.ok) {
-    const err = data as StrapiError;
-    throw new Error(translateError(err.error?.message, "Erreur lors de l'inscription. Veuillez réessayer."));
+    const errMsg =
+      (typeof data?.error === "object" ? data.error.message : undefined) ||
+      (typeof data?.message === "string" ? data.message : undefined) ||
+      "";
+    throw new Error(translateError(errMsg, "Erreur lors de l'inscription. Veuillez réessayer."));
   }
 
   // When email confirmation is enabled, Strapi returns user but no JWT
