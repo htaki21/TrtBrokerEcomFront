@@ -7,7 +7,8 @@ export const InscriptionSchema = z.object({
 
   telephone: z
     .string()
-    .min(10, "Min. 10 chiffres")
+    .min(10, "Le numéro doit contenir 10 chiffres")
+    .max(10, "Le numéro doit contenir 10 chiffres")
     .regex(/^\d+$/, "Chiffres uniquement")
     .optional()
     .or(z.literal("")),

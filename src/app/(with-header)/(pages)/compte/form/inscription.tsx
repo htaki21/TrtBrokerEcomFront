@@ -159,13 +159,14 @@ export default function InscriptionForm() {
           <input
             type="tel"
             inputMode="numeric"
-            placeholder="Ex : 06 12 34 56 78"
+            maxLength={10}
+            placeholder="Ex : 0612345678"
             aria-invalid={!!errors.telephone}
             aria-describedby={errors.telephone ? "tel-error" : undefined}
             disabled={isSubmitting}
             {...register("telephone")}
             className={`placeholder:text-Sage-Gray-Medium outline-none border-none py-3 px-4 w-full rounded-[8px]
-            bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark disabled:opacity-50 transition hover:ring 
+            bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark disabled:opacity-50 transition hover:ring
             select-none cursor-text ${errors.telephone ? "ring-red-500 focus-within:ring-red-500 hover:ring-red-500" : "hover:ring-Neutral-Dark"} `}
           />
           {errors.telephone && (

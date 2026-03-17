@@ -11,7 +11,15 @@ import { useAuth } from "@/app/components/auth/AuthContext";
 import toast from "react-hot-toast";
 
 const InfoSchema = z.object({
+  nom: z.string().min(2, "Nom requis"),
   email: z.string().min(1, "Email requis").email("Email invalide"),
+  telephone: z
+    .string()
+    .min(10, "Le numéro doit contenir 10 chiffres")
+    .max(10, "Le numéro doit contenir 10 chiffres")
+    .regex(/^\d+$/, "Chiffres uniquement")
+    .optional()
+    .or(z.literal("")),
   password: z.string().min(8, "Min. 8 caractères").optional().or(z.literal("")),
 });
 
@@ -94,20 +102,27 @@ export default function InfoPersonnellesForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<InfoData>({
     resolver: zodResolver(InfoSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
+      nom: user?.nom || "",
       email: user?.email || "",
+      telephone: user?.telephone || "",
       password: "",
     },
   });
 
   useEffect(() => {
     if (user) {
-      reset({ email: user.email, password: "" });
+      reset({
+        nom: user.nom || "",
+        email: user.email || "",
+        telephone: user.telephone || "",
+        password: "",
+      });
     }
   }, [user, reset]);
 
@@ -115,12 +130,14 @@ export default function InfoPersonnellesForm() {
     setSubmitError(null);
     try {
       const payload: Record<string, string> = {};
+      if (data.nom !== (user?.nom || "")) payload.nom = data.nom;
       if (data.email !== user?.email) payload.email = data.email;
+      if (data.telephone !== (user?.telephone || "")) payload.telephone = data.telephone || "";
       if (data.password) payload.password = data.password;
       if (Object.keys(payload).length === 0) return;
       await update(payload);
       await refreshUser();
-      reset({ email: data.email, password: "" });
+      reset({ nom: data.nom, email: data.email, telephone: data.telephone || "", password: "" });
       toast.success("Informations mises à jour");
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Erreur lors de la mise à jour");
@@ -137,13 +154,34 @@ export default function InfoPersonnellesForm() {
       <h5 className="Headings-H5">Info personnelles</h5>
       <div className="f-col gap-4">
         {/* NOM */}
-        <div className="f-col gap-1.5">
+        <label className="f-col gap-1.5">
           <span>Nom complet</span>
-          <div className="flex items-center gap-2 py-3 px-4 rounded-[8px] bg-Sage-Gray-Lowest">
-            <IconUser className=" shrink-0" />
-            <span>{user?.nom || user?.username || "—"}</span>
+          <div className="flex items-center gap-1.5">
+            <div className="f-col gap-1.5 flex-1">
+              <div
+                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] transition hover:ring
+            bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark select-none cursor-text
+             ${errors.nom ? "ring-red-500 focus-within:ring-red-500 hover:ring-red-500" : "hover:ring-Neutral-Dark"} `}
+              >
+                <IconUser className="shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Ex : Amine El Mehdi"
+                  aria-invalid={!!errors.nom}
+                  disabled={isSubmitting}
+                  {...register("nom")}
+                  className="placeholder:text-Sage-Gray-Medium outline-none border-none w-full"
+                />
+              </div>
+              {errors.nom && (
+                <p className="text-red-500">{errors.nom.message}</p>
+              )}
+            </div>
+            <span className="p-3 flex-center rounded-full bg-Sage-Gray-Lower">
+              <IconPencil className="shrink-0" />
+            </span>
           </div>
-        </div>
+        </label>
 
         {/* EMAIL */}
         <label className="f-col gap-1.5">
@@ -151,63 +189,80 @@ export default function InfoPersonnellesForm() {
           <div className="flex items-center gap-1.5">
             <div className="f-col gap-1.5 flex-1">
               <div
-                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] disabled:opacity-50 transition hover:ring
+                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] transition hover:ring
             bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark select-none cursor-text
              ${errors.email ? "ring-red-500 focus-within:ring-red-500 hover:ring-red-500" : "hover:ring-Neutral-Dark"} `}
               >
-                <IconMail className=" shrink-0 size-5" />
+                <IconMail className="shrink-0 size-5" />
                 <input
                   type="email"
                   placeholder="amina@email.com"
                   aria-invalid={!!errors.email}
-                  aria-describedby={errors.email ? "email-error" : undefined}
                   disabled={isSubmitting}
                   {...register("email")}
-                  className={`placeholder:text-Sage-Gray-Medium outline-none border-none w-full`}
+                  className="placeholder:text-Sage-Gray-Medium outline-none border-none w-full"
                 />
               </div>
               {errors.email && (
-                <p id="email-error" className="text-red-500">
-                  {errors.email.message}
-                </p>
+                <p className="text-red-500">{errors.email.message}</p>
               )}
             </div>
             <span className="p-3 flex-center rounded-full bg-Sage-Gray-Lower">
-              <IconPencil className=" shrink-0" />
+              <IconPencil className="shrink-0" />
             </span>
           </div>
         </label>
 
-        {/* Téléphone */}
-        <div className="f-col gap-1.5">
-          <span>Téléphone</span>
-          <div className="flex items-center gap-2 py-3 px-4 rounded-[8px] bg-Sage-Gray-Lowest">
-            <IconPhone className="size-5 shrink-0" />
-            <span>{user?.telephone || "—"}</span>
-          </div>
-        </div>
-
-        {/* PASSWORD */}
+        {/* TELEPHONE */}
         <label className="f-col gap-1.5">
-          <span>Mot de passe</span>
+          <span>Téléphone</span>
           <div className="flex items-center gap-1.5">
             <div className="f-col gap-1.5 flex-1">
               <div
-                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] disabled:opacity-50 transition hover:ring
+                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] transition hover:ring
+            bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark select-none cursor-text
+             ${errors.telephone ? "ring-red-500 focus-within:ring-red-500 hover:ring-red-500" : "hover:ring-Neutral-Dark"} `}
+              >
+                <IconPhone className="size-5 shrink-0" />
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="Ex : 0612345678"
+                  aria-invalid={!!errors.telephone}
+                  disabled={isSubmitting}
+                  {...register("telephone")}
+                  className="placeholder:text-Sage-Gray-Medium outline-none border-none w-full"
+                />
+              </div>
+              {errors.telephone && (
+                <p className="text-red-500">{errors.telephone.message}</p>
+              )}
+            </div>
+            <span className="p-3 flex-center rounded-full bg-Sage-Gray-Lower">
+              <IconPencil className="shrink-0" />
+            </span>
+          </div>
+        </label>
+
+        {/* PASSWORD */}
+        <label className="f-col gap-1.5">
+          <span>Nouveau mot de passe</span>
+          <div className="flex items-center gap-1.5">
+            <div className="f-col gap-1.5 flex-1">
+              <div
+                className={`flex items-center gap-2 py-3 px-4 w-full rounded-[8px] transition hover:ring
             bg-Sage-Gray-Lowest focus-within:ring focus-within:ring-Neutral-Dark select-none cursor-text
              ${errors.password ? "ring-red-500 focus-within:ring-red-500 hover:ring-red-500" : "hover:ring-Neutral-Dark"} `}
               >
-                <IconLock className=" shrink-0"/>
+                <IconLock className="shrink-0"/>
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 8 caractères"
+                  placeholder="Laisser vide pour ne pas changer"
                   aria-invalid={!!errors.password}
-                  aria-describedby={
-                    errors.password ? "password-error" : undefined
-                  }
                   disabled={isSubmitting}
                   {...register("password")}
-                  className={`placeholder:text-Sage-Gray-Medium outline-none border-none w-full`}
+                  className="placeholder:text-Sage-Gray-Medium outline-none border-none w-full"
                 />
                 {showPassword ? (
                   <IconeyeClosed
@@ -222,13 +277,11 @@ export default function InfoPersonnellesForm() {
                 )}
               </div>
               {errors.password && (
-                <p id="password-error" className="text-red-500">
-                  {errors.password.message}
-                </p>
+                <p className="text-red-500">{errors.password.message}</p>
               )}
             </div>
             <span className="p-3 flex-center rounded-full bg-Sage-Gray-Lower">
-              <IconPencil className=" shrink-0" />
+              <IconPencil className="shrink-0" />
             </span>
           </div>
         </label>
@@ -237,7 +290,7 @@ export default function InfoPersonnellesForm() {
       {submitError && <p className="text-red-500">{submitError}</p>}
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !isDirty}
         className="flex-center gap-1 flex-1 py-2 px-4 rounded-full bg-Brand-500 text-white
            hover:bg-Brand-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
