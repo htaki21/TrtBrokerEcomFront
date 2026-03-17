@@ -560,8 +560,18 @@ async function handleDevisSubmission(request: NextRequest) {
                                     : formType === "individuelle-accidents"
                                       ? `
                   <li><strong>Formule d'assurance :</strong> ${
-                    formData.formuleAssurance || "Non spécifiée"
+                    formData.formuleDisplay || formData.formuleAccidents || formData.formuleAssurance || "Non spécifiée"
                   }</li>
+                  ${
+                    formData.prixFormule
+                      ? `<li><strong>Prix :</strong> ${formData.prixFormule} DH TTC</li>`
+                      : ""
+                  }
+                  ${
+                    formData.modePaiement
+                      ? `<li><strong>Mode de paiement :</strong> ${formData.modePaiement === "virement_bancaire" ? "Virement bancaire" : "Paiement en agence"}</li>`
+                      : ""
+                  }
                   ${
                     formData.datePreference
                       ? `<li><strong>Date de préférence :</strong> ${new Date(
@@ -1670,16 +1680,19 @@ async function handleDevisSubmission(request: NextRequest) {
             },
           };
         } else if (formType === "individuelle-accidents") {
-          // Use individuelle-accidents endpoint structure - ORIGINAL WORKING VERSION
+          // Use individuelle-accidents endpoint structure
           strapiPayload = {
             data: {
               formuleAssurance: formData.formuleAssurance,
+              formuleDisplay: formData.formuleDisplay || formData.formuleAccidents || undefined,
+              prixFormule: formData.prixFormule || undefined,
               prenom: formData.prenom,
               nom: formData.nom,
               telephone: formData.telephone,
               ...(formData.email && formData.email.trim()
                 ? { email: formData.email }
                 : {}),
+              modePaiement: formData.modePaiement || undefined,
               optinMarketing: formData.optinMarketing || false,
               conditionsAcceptees: formData.conditionsAcceptees || false,
               ipAddress: formData.ipAddress || "127.0.0.1",
