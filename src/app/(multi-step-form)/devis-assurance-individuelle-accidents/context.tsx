@@ -107,10 +107,24 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     return stepValidationMap[index]?.() ?? false;
   };
 
-  const isFormValid = () =>
-    Object.keys(stepValidationMap).every((key) =>
+  const isFormValid = () => {
+    const result = Object.keys(stepValidationMap).every((key) =>
       stepValidationMap[Number(key)]()
     );
+    if (!result) {
+      console.log("[DEBUG] isFormValid=false", {
+        formuleAccidents: Boolean(data.formuleAccidents),
+        prenom: Boolean(data.prenom),
+        nom: Boolean(data.nom),
+        email: data.email,
+        emailValid: data.email && data.email.trim() ? validateEmail(data.email) : "empty=ok",
+        phone: Boolean(data.phone),
+        dateReceptionSouhaitee: Boolean(data.dateReceptionSouhaitee),
+        termsAccepted: Boolean(data.termsAccepted),
+      });
+    }
+    return result;
+  };
 
   const submitForm = async (): Promise<{
     success: boolean;
