@@ -5,6 +5,7 @@ import { generateRecapPdf } from "@/lib/utils/generateRecapPdf";
 import { generateVoyagePdf } from "@/lib/utils/generateVoyagePdf";
 import { useRouter } from "next/navigation";
 import { SVGProps, useEffect, useState } from "react";
+import ResendEmailButton from "./ResendEmailButton";
 
 export function IconCheck(props: SVGProps<SVGSVGElement>) {
   return (
@@ -25,7 +26,6 @@ export function IconCheck(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-
 export function IconDownload(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -47,29 +47,6 @@ export function IconDownload(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-
-export function IconRefresh(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
-      viewBox="0 0 20 20"
-      fill="none"
-    >
-      <path
-        d="M3.33203 9.37467C3.67721 9.37467 3.95703 9.6545 3.95703 9.99967C3.95703 11.602 4.5932 13.1391 5.72624 14.2721C6.85889 15.4048 8.39531 16.0401 9.99707 16.0405C11.6992 16.0339 13.333 15.3706 14.5568 14.1875L15.1566 13.5877H12.9618C12.6166 13.5877 12.3368 13.3079 12.3368 12.9627C12.3368 12.6175 12.6166 12.3377 12.9618 12.3377H16.6654C17.0105 12.3377 17.2904 12.6175 17.2904 12.9627V16.6663C17.2904 17.0115 17.0105 17.2913 16.6654 17.2913C16.3202 17.2913 16.0404 17.0115 16.0404 16.6663V14.4715L15.4259 15.0859C13.97 16.4934 12.0261 17.2837 10.0011 17.2913H9.9987C8.06483 17.2913 6.2099 16.5234 4.84245 15.1559C3.475 13.7885 2.70703 11.9335 2.70703 9.99967C2.70703 9.6545 2.98685 9.37467 3.33203 9.37467Z"
-        fill="#0F110C"
-      />
-      <path
-        d="M9.9987 2.70801C11.9326 2.70801 13.7875 3.47597 15.1549 4.84342C16.5224 6.21088 17.2904 8.0658 17.2904 9.99967C17.2904 10.3449 17.0105 10.6247 16.6654 10.6247C16.3202 10.6247 16.0404 10.3449 16.0404 9.99967C16.0404 8.39733 15.4042 6.86025 14.2712 5.72721C13.1383 4.59437 11.6016 3.95822 9.99951 3.95801C8.29766 3.96481 6.66423 4.62899 5.44059 5.81185L4.84082 6.41162H7.03564C7.38079 6.41162 7.6606 6.69148 7.66064 7.03662C7.66064 7.3818 7.38082 7.66162 7.03564 7.66162H3.33203C2.98685 7.66162 2.70703 7.3818 2.70703 7.03662V3.33301C2.70703 2.98783 2.98685 2.70801 3.33203 2.70801C3.67721 2.70801 3.95703 2.98783 3.95703 3.33301V5.52783L4.57145 4.91341C6.02737 3.50594 7.97126 2.71565 9.99626 2.70801H9.9987Z"
-        fill="#0F110C"
-      />
-    </svg>
-  );
-}
-
 export function IconInfo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -121,7 +98,8 @@ interface SuccessFormData {
 
 function generateReference(): string {
   const now = new Date();
-  const num = String(now.getFullYear()).slice(-2) +
+  const num =
+    String(now.getFullYear()).slice(-2) +
     String(now.getMonth() + 1).padStart(2, "0") +
     String(now.getDate()).padStart(2, "0") +
     String(Math.floor(Math.random() * 9000) + 1000);
@@ -207,7 +185,9 @@ export default function SuccessPage() {
                 {formData?.nom && (
                   <>
                     <span className="Text-M text-Sage-Gray-Higher">Nom</span>
-                    <span className="button-s">{formData.prenom} {formData.nom}</span>
+                    <span className="button-s">
+                      {formData.prenom} {formData.nom}
+                    </span>
                   </>
                 )}
 
@@ -316,14 +296,7 @@ export default function SuccessPage() {
                       Vérifiez votre boîte de réception (et les spams)
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1 py-2 px-4 rounded-full bg-Sage-Gray-Lower
-              transition hover:bg-Sage-Gray-Low cursor-pointer button-s"
-                  >
-                    <span>Renvoyer l&apos;email</span>
-                    <IconRefresh className="shrink-0" />
-                  </button>
+                  <ResendEmailButton />
                 </div>
               </div>
             </div>
@@ -346,7 +319,9 @@ export default function SuccessPage() {
             type="button"
             onClick={() => {
               if (isVoyage) {
-                generateVoyagePdf({ ...formData, reference } as Parameters<typeof generateVoyagePdf>[0]);
+                generateVoyagePdf({ ...formData, reference } as Parameters<
+                  typeof generateVoyagePdf
+                >[0]);
               } else {
                 generateRecapPdf({
                   reference,
