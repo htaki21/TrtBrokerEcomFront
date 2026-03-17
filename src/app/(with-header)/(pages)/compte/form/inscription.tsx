@@ -46,19 +46,21 @@ const checkboxItems: CheckboxItem[] = [
       <>
         J’ai lu et j’accepte{" "}
         <Link
-          href="/conditions-generales"
+          href="/conditions-generales-utilisation"
+          target="_blank"
           className="text-Neutral-Dark underline"
-          onClick={(e) => e.stopPropagation()} // prevent toggling checkbox
+          onClick={(e) => e.stopPropagation()}
         >
-          les conditions générales d’utilisation,
+          les conditions générales d&apos;utilisation
         </Link>{" "}
-        notamment la mention relative à{" "}
+        et{" "}
         <Link
-          href="/politique-de-confidentialite"
+          href="/mentions-legales"
+          target="_blank"
           className="text-Neutral-Dark underline"
-          onClick={(e) => e.stopPropagation()} // prevent toggling checkbox
+          onClick={(e) => e.stopPropagation()}
         >
-          la protection des données personnelles.
+          les mentions légales.
         </Link>
       </>
     ),
