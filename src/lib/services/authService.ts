@@ -187,7 +187,7 @@ export async function resendConfirmationEmail(email: string): Promise<void> {
 }
 
 export async function getMe(jwt: string): Promise<AuthUser> {
-  const res = await fetch(`${STRAPI_URL}/api/users/me?populate=photo`, {
+  const res = await fetch(`${STRAPI_URL}/api/users/me`, {
     headers: { Authorization: `Bearer ${jwt}` },
   });
 
