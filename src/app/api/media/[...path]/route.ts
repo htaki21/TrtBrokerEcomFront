@@ -24,7 +24,6 @@ export async function GET(
     // Construct backend URL using internal Docker network in production
     const backendUrl =
       process.env.STRAPI_INTERNAL_URL ||
-      process.env.STRAPI_API_URL ||
       process.env.NEXT_PUBLIC_STRAPI_API_URL;
 
     if (!backendUrl) {

@@ -55,8 +55,8 @@ export interface CategoryResponse {
 }
 
 const STRAPI_API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL;
-const SELF_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
+// Always use localhost for server-side self-calls (avoids Docker hairpin NAT issues)
+const SELF_URL = `http://localhost:${process.env.PORT || 3000}`;
 
 // Get all categories
 export const getCategories = async (): Promise<BlogCategory[]> => {
