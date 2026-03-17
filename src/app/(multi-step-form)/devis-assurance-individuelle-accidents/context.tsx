@@ -84,10 +84,11 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
       1: () => {
         const isEmailValid =
           data.email && data.email.trim()
-            ? validateEmail(data.email) && !fieldErrors.email
+            ? validateEmail(data.email)
             : true; // Email is optional, so empty email is valid
 
         return (
+          Boolean(data.formuleAccidents) &&
           Boolean(data.prenom) &&
           Boolean(data.nom) &&
           isEmailValid &&
