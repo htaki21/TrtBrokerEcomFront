@@ -80,7 +80,7 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
 
   const stepValidationMap = useMemo<Record<number, () => boolean>>(
     () => ({
-      0: () => true,
+      0: () => Boolean(data.formuleAccidents),
       1: () => {
         const isEmailValid =
           data.email && data.email.trim()
@@ -88,7 +88,6 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
             : true; // Email is optional, so empty email is valid
 
         return (
-          Boolean(data.formuleAccidents) &&
           Boolean(data.prenom) &&
           Boolean(data.nom) &&
           isEmailValid &&
@@ -107,24 +106,10 @@ export function FormProvider({ children }: { children: React.ReactNode }) {
     return stepValidationMap[index]?.() ?? false;
   };
 
-  const isFormValid = () => {
-    const result = Object.keys(stepValidationMap).every((key) =>
+  const isFormValid = () =>
+    Object.keys(stepValidationMap).every((key) =>
       stepValidationMap[Number(key)]()
     );
-    if (!result) {
-      console.log("[DEBUG] isFormValid=false", {
-        formuleAccidents: Boolean(data.formuleAccidents),
-        prenom: Boolean(data.prenom),
-        nom: Boolean(data.nom),
-        email: data.email,
-        emailValid: data.email && data.email.trim() ? validateEmail(data.email) : "empty=ok",
-        phone: Boolean(data.phone),
-        dateReceptionSouhaitee: Boolean(data.dateReceptionSouhaitee),
-        termsAccepted: Boolean(data.termsAccepted),
-      });
-    }
-    return result;
-  };
 
   const submitForm = async (): Promise<{
     success: boolean;

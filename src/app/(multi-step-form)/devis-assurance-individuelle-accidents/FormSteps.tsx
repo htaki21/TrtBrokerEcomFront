@@ -47,11 +47,20 @@ export default function FormSteps() {
   const draftId = searchParams.get("draftId");
 
   useEffect(() => {
-    try { sessionStorage.setItem("form_accidents_step", String(currentStepIndex)); sessionStorage.setItem("form_accidents_data", JSON.stringify(data)); } catch {}
+    // Only persist if user has started filling the form
+    if (data.formuleAccidents) {
+      try { sessionStorage.setItem("form_accidents_step", String(currentStepIndex)); sessionStorage.setItem("form_accidents_data", JSON.stringify(data)); } catch {}
+    }
   }, [currentStepIndex, data]);
   useEffect(() => {
     if (draftId) return;
-    try { const s = sessionStorage.getItem("form_accidents_data"); if (s) { const p = JSON.parse(s); if (p && typeof p === "object" && Object.keys(p).length > 1) setData(p); } } catch {}
+    try {
+      const s = sessionStorage.getItem("form_accidents_data");
+      if (s) {
+        const p = JSON.parse(s);
+        if (p && typeof p === "object" && p.formuleAccidents) setData(p);
+      }
+    } catch {}
   }, []);
 
   // 1️⃣ Restore draft if URL contains draftId
