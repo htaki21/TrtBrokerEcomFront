@@ -115,6 +115,7 @@ export const submitIndividuelleAccidentsForm = async (
   message: string;
   error?: string;
   type?: string;
+  reference?: string;
 }> => {
   try {
     const apiData = mapFormDataToApi(formData);
@@ -174,6 +175,7 @@ export const submitIndividuelleAccidentsForm = async (
       success: true,
       message:
         "Votre demande d'assurance individuelle accidents a été transmise avec succès. Notre équipe d'experts vous contactera dans les plus brefs délais pour personnaliser votre couverture.",
+      reference: result.reference || result.devisNumber || "",
     };
   } catch (error) {
     // Ensure we always return a string message

@@ -138,6 +138,16 @@ export default function NavigationButtons<
                 dateReceptionSouhaitee: d.dateReceptionSouhaitee || d.date || "",
                 creneauHoraire: d.creneauHoraire || "",
               }));
+              if (d.email) {
+                sessionStorage.setItem("resendEmail", String(d.email));
+                sessionStorage.setItem("resendFormData", JSON.stringify({
+                  reference: (result as Record<string, unknown>).reference || "",
+                  prenom: d.prenom || "",
+                  nom: d.nom || "",
+                  productName: getProductName(),
+                  montant: d.primedelassistance || d.prixFormule || "",
+                }));
+              }
               // Clear form persistence keys
               ["auto","habitation","moto","sante","plaisance","accidents","voyage"].forEach((k) => {
                 sessionStorage.removeItem(`form_${k}_step`);
@@ -189,6 +199,7 @@ export default function NavigationButtons<
             dateReceptionSouhaitee: d.dateReceptionSouhaitee || d.date || "",
             creneauHoraire: d.creneauHoraire || "",
           }));
+          if (d.email) sessionStorage.setItem("resendEmail", String(d.email));
         } catch {}
 
         showSuccess(

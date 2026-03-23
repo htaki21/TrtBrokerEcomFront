@@ -755,6 +755,7 @@ export function getSecurityHeaders(): Record<string, string> {
         `img-src 'self' data: https: ${strapiUrl} blob:`,
         "font-src 'self' data: https://fonts.gstatic.com",
         `connect-src 'self' ${strapiUrl}`,
+        "frame-src 'self' https://www.google.com https://maps.google.com https://maps.app.goo.gl",
         "frame-ancestors 'none'",
         "base-uri 'self'",
         "form-action 'self'",

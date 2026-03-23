@@ -1812,6 +1812,11 @@ async function handleDevisSubmission(request: NextRequest) {
           };
         }
 
+        // Inject reference into every payload
+        if (strapiPayload && typeof strapiPayload === "object" && "data" in strapiPayload) {
+          (strapiPayload as { data: Record<string, unknown> }).data.reference = devisReference;
+        }
+
         // Making Strapi request
         console.log("🔗 Submitting to Strapi:", {
           url: strapiUrl,

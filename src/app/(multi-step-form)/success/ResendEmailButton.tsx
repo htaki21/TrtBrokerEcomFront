@@ -180,21 +180,56 @@ export default function ResendEmailButton() {
 
     setStatus("loading");
 
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const email = sessionStorage.getItem("resendEmail");
+      const storedData = sessionStorage.getItem("resendFormData");
+      const successData = sessionStorage.getItem("formSuccessData");
 
-    // simulate API response (keeps union type)
-    const possibleResults: Result[] = ["success", "error", "limit"];
-    const result = possibleResults[0];
+      // Try resendFormData first, fall back to formSuccessData
+      let formData: Record<string, string> | null = null;
+      let userEmail = email;
 
-    if (result === "success") {
-      setStatus("success");
-      setSeconds(5);
-    } else if (result === "error") {
+      if (storedData) {
+        formData = JSON.parse(storedData);
+      } else if (successData) {
+        const parsed = JSON.parse(successData);
+        formData = parsed;
+        userEmail = userEmail || parsed.email;
+      }
+
+      if (!userEmail || !formData) {
+        setStatus("error");
+        setSeconds(45);
+        return;
+      }
+
+      const payload = {
+        email: userEmail,
+        reference: formData.reference || "",
+        prenom: formData.prenom || "",
+        nom: formData.nom || "",
+        productName: formData.productName || "",
+        montant: formData.montant || formData.primedelassistance || "",
+      };
+      const res = await fetch("/api/resend-virement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setStatus("success");
+        setSeconds(45);
+      } else if (res.status === 429) {
+        setStatus("limit");
+        setSeconds(600);
+      } else {
+        setStatus("error");
+        setSeconds(600);
+      }
+    } catch {
       setStatus("error");
-      setSeconds(10);
-    } else {
-      setStatus("limit");
-      setSeconds(10);
+      setSeconds(600);
     }
   };
 
@@ -214,7 +249,7 @@ export default function ResendEmailButton() {
       <div className="f-col items-start gap-1">
         <div className="f-col gap-2">
           <span className="button-s text-Sage-Gray-High">
-            Réessayez dans {seconds}s
+            Réessayez dans {seconds >= 60 ? `${Math.ceil(seconds / 60)} min` : `${seconds} s`}
           </span>
 
           <button
@@ -241,7 +276,7 @@ export default function ResendEmailButton() {
       <div className="f-col items-start gap-1">
         <div className="f-col gap-2">
           <span className="button-s text-Secondary-Red-Low">
-            Réessayez dans {Math.ceil(seconds / 60)} minutes
+            Réessayez dans {seconds >= 60 ? `${Math.ceil(seconds / 60)} min` : `${seconds} s`}
           </span>
 
           <button
@@ -268,7 +303,7 @@ export default function ResendEmailButton() {
       <div className="f-col items-start gap-1">
         <div className="f-col gap-2">
           <span className="button-s text-Sage-Gray-High">
-            Réessayez dans {Math.ceil(seconds / 60)} minutes
+            Réessayez dans {seconds >= 60 ? `${Math.ceil(seconds / 60)} min` : `${seconds} s`}
           </span>
 
           <button

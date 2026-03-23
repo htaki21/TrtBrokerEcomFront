@@ -246,61 +246,121 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        {hasPayment && (
-          <>
-            {/* Paiement en agence section */}
-            <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-              <div className="p-5 rounded-2xl bg-white flex items-start justify-between gap-3 shadow-md max-mobile:flex-col">
+        {/* Paiement en agence section — only if user chose agence */}
+        {hasPayment && (!formData?.modePaiement || formData.modePaiement === "Paiement en agence") && (
+          <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
+            <div className="p-5 rounded-2xl bg-white f-col gap-5 shadow-md">
+              <div className="flex items-start justify-between gap-3 max-mobile:flex-col">
                 <ul className="f-col gap-1">
                   <li className="f-col gap-3">
-                    <span className="Headings-H5">Prochaine étape :</span>
+                    <span className="Headings-H5">Prochaine étape : Présentez-vous en agence</span>
                     <span className="Text-M text-Text-Body">
-                      Présentez-vous dans l&apos;une de nos agences avec votre
-                      référence :
+                      Rendez-vous dans notre agence avec votre référence :
                     </span>
                   </li>
                   <li className="f-col gap-3">
-                    <span className="Headings-H5">{reference}</span>
+                    <span className="Headings-H4 text-Brand-500">{reference}</span>
                     <span className="Text-M text-Text-Body">
-                      Un conseiller finalisera votre contrat.
+                      Un conseiller finalisera votre contrat sur place.
                     </span>
                   </li>
                 </ul>
                 <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower shrink-0">
                   <IconInfo className="shrink-0" />
                   <span className="button-s text-Sage-Gray-Higher">
-                    Nos équipes sont disponibles du lundi au vendredi
+                    Du lundi au vendredi, 9h - 18h
                   </span>
                 </div>
               </div>
-            </div>
-            {/* Virement bancaire section */}
-            <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
-              <div className="p-5 rounded-2xl bg-white flex justify-between gap-3 shadow-md max-mobile:flex-col">
-                <div className="f-col gap-3">
-                  <span className="Headings-H5">Prochaine étape :</span>
-                  <div className="f-col">
-                    <span className="Text-M text-Text-Body">
-                      Les coordonnées bancaires vous ont été envoyées par email.
-                    </span>
-                    <span className="Text-M text-Text-Body">
-                      Merci d&apos;indiquer votre référence dans le motif :
-                    </span>
-                    <span className="Headings-H4 mt-1">{reference}</span>
-                  </div>
+              <div className="f-col gap-3">
+                <div className="f-col gap-1">
+                  <span className="button-s text-Sage-Gray-Higher">Adresse</span>
+                  <a
+                    href="https://maps.app.goo.gl/YaKiKsp3CHjjtaDT9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="Text-M text-Brand-500 underline"
+                  >
+                    N°33 IMM SEMIRAMI, ANGLE RUES FAKER MOHAMED ET KAMAL MOHAMED, Casablanca 23000
+                  </a>
                 </div>
-                <div className="f-col items-end justify-between shrink-0 max-mobile:items-start max-mobile:gap-3">
-                  <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
-                    <IconInfo className="shrink-0" />
-                    <span className="button-s text-Sage-Gray-Higher">
-                      Vérifiez votre boîte de réception (et les spams)
-                    </span>
-                  </div>
-                  <ResendEmailButton />
+                <div className="w-full h-[200px] rounded-xl overflow-hidden">
+                  <iframe
+                    src="https://maps.google.com/maps?q=TRT+BROKER+ASSURANCE,Casablanca&z=17&output=embed"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="TRT Broker - Agence Casablanca"
+                  />
                 </div>
+                <a
+                  href="https://maps.app.goo.gl/YaKiKsp3CHjjtaDT9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 py-2 px-4 rounded-full bg-Brand-500 text-white button-s transition hover:bg-Brand-600 w-fit"
+                >
+                  Ouvrir dans Google Maps
+                </a>
               </div>
             </div>
-          </>
+          </div>
+        )}
+
+        {/* Virement bancaire section — only if user chose virement */}
+        {hasPayment && formData?.modePaiement === "Virement bancaire" && (
+          <div className="p-2 bg-Sage-Gray-Low rounded-3xl">
+            <div className="p-5 rounded-2xl bg-white f-col gap-5 shadow-md">
+              <div className="flex items-start justify-between gap-3 max-mobile:flex-col">
+                <div className="f-col gap-3">
+                  <span className="Headings-H5">Prochaine étape : Effectuez votre virement bancaire</span>
+                  <div className="f-col gap-4">
+                    <span className="Text-M text-Text-Body">
+                      Effectuez votre virement vers le compte suivant :
+                    </span>
+                    <div className="f-col gap-2 p-4 bg-Sage-Gray-Lowest rounded-xl">
+                      <div className="flex gap-2">
+                        <span className="button-s text-Sage-Gray-Higher w-[120px] shrink-0">Banque</span>
+                        <span className="Text-M">Attijariwafa Bank</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="button-s text-Sage-Gray-Higher w-[120px] shrink-0">Bénéficiaire</span>
+                        <span className="Text-M">TRT BROKER</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="button-s text-Sage-Gray-Higher w-[120px] shrink-0">RIB</span>
+                        <span className="Text-M font-mono">007 780 0001265000004617 63</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="button-s text-Sage-Gray-Higher w-[120px] shrink-0">SWIFT</span>
+                        <span className="Text-M font-mono">BCMAMAMC</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2 p-3 bg-[#FFF8E1] rounded-xl">
+                      <span className="text-lg shrink-0">⚠️</span>
+                      <div className="f-col gap-1">
+                        <span className="button-s">
+                          Indiquez obligatoirement la référence suivante dans le motif du virement :
+                        </span>
+                        <span className="Headings-H4 text-Brand-500">{reference}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 max-mobile:flex-col max-mobile:items-start">
+                <div className="flex items-center gap-1 rounded-full p-1 bg-Sage-Gray-Lower">
+                  <IconInfo className="shrink-0" />
+                  <span className="button-s text-Sage-Gray-Higher">
+                    Vérifiez votre boîte de réception (et les spams)
+                  </span>
+                </div>
+                <ResendEmailButton />
+              </div>
+            </div>
+          </div>
         )}
       </div>
       <div className="flex max-mobile:flex-col gap-3">

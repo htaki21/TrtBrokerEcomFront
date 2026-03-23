@@ -75,6 +75,7 @@ function FinalStepSubmitButton({
               prenom: data.prenom,
               nom: data.nom,
               email: data.email,
+              phone: data.phone || "",
               reference: result.reference,
               assistanceVoyage: data.assistanceVoyage,
               primedelassistance: data.primedelassistance,
@@ -84,6 +85,16 @@ function FinalStepSubmitButton({
               modePaiement: data.modePaiement,
               dureeVisa: data.dureeVisa,
             }));
+            if (data.email) {
+              sessionStorage.setItem("resendEmail", data.email);
+              sessionStorage.setItem("resendFormData", JSON.stringify({
+                reference: result.reference || "",
+                prenom: data.prenom || "",
+                nom: data.nom || "",
+                productName: "Assistance Voyage",
+                montant: data.primedelassistance || "",
+              }));
+            }
           } catch {}
 
           toast.success(
